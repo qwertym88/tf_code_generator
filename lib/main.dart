@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/widget/code_widget.dart';
+import 'package:flutter_application_1/widget/menu_widget.dart';
+import 'package:flutter_application_1/widget/toolbar_widget.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,21 +16,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Helloworld Demo',
       theme: ThemeData(
-          // This is the theme of your application.
-          //
-          // TRY THIS: Try running your application with "flutter run". You'll see
-          // the application has a purple toolbar. Then, without quitting the app,
-          // try changing the seedColor in the colorScheme below to Colors.green
-          // and then invoke "hot reload" (save your changes or press the "hot
-          // reload" button in a Flutter-supported IDE, or press "r" if you used
-          // the command line to start the app).
-          //
-          // Notice that the counter didn't reset back to zero; the application
-          // state is not lost during the reload. To reset the state, use hot
-          // restart instead.
-          //
-          // This works for code too, not just values: Most code changes can be
-          // tested with just a hot reload.
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
           visualDensity: VisualDensity.adaptivePlatformDensity),
@@ -61,45 +49,30 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text('hello')),
-        body: Column(children: <Widget>[
-          Text.rich(TextSpan(
-            children: [
-              const TextSpan(text: 'pressed '),
-              TextSpan(
-                  text: '$cnt',
-                  style: const TextStyle(
-                      fontSize: 18.0, color: Colors.blueAccent)),
-              const TextSpan(text: ' times')
-            ],
-          )),
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              OutlinedButton.icon(
-                onPressed: increase,
-                icon: const Icon(Icons.add),
-                label: const Text('add'),
-              ),
-              ElevatedButton(
-                  onPressed: clearCnt,
-                  child: const Icon(
-                    Icons.clear,
-                    color: Colors.redAccent,
-                  ))
-            ],
-          ),
-          TextField(
-            decoration: InputDecoration(
-                hintText: cnt > 5 ? 'cnt > 10' : null,
-                prefixIcon: const Icon(Icons.send_outlined),
-                labelText: 'some text info'),
-          ),
-          LinearProgressIndicator(
-            backgroundColor: Colors.grey[200],
-            valueColor: const AlwaysStoppedAnimation(Colors.blue),
-          ),
-        ]));
+      appBar: AppBar(title: const Text('hello')),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          const minWidth = 100.0;
+          const maxWidth = 300.0;
+          return Row(children: <Widget>[
+            // TODO: 研究下到底怎么分配页面好看
+            SizedBox(
+              width: constraints.maxWidth > 980.0 ? 335 : 0,
+              child: const MenuWidget(),
+            ),
+            const Expanded(child: CodeWidget()),
+            SizedBox(
+              width: constraints.maxWidth > 980.0 ? 335 : 0,
+              child: const ToolbarWidget(),
+            ),
+          ]);
+        },
+      ),
+      // TODO: 非常想弄个可展开的fab，然后将功能全部放进去
+      floatingActionButton: const IconButton(
+        icon: Icon(Icons.add),
+        onPressed: null,
+      ),
+    );
   }
 }

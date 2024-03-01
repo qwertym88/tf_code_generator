@@ -1,0 +1,70 @@
+{
+    "framework": "TensorFlow",
+    "lr": 0.001,
+    "loss": "sparse_categorical_crossentropy",
+    "optimizer": "Adam",
+    "epoch": 10,
+    "batch": 32,
+    "layers": [
+        {
+            "type": "input",
+            "dimensions": [
+                28,
+                28,
+                1
+            ],
+            "filter_num": null,
+            "filter_size": [],
+            "stride": null,
+            "padding": null,
+            "activation": null,
+            "nou": null
+        },
+        {
+            "type": "Conv2D",
+            "dimensions": [],
+            "filter_num": 32,
+            "filter_size": [
+                3,
+                3
+            ],
+            "stride": 1,
+            "padding": "valid",
+            "activation": "relu",
+            "nou": null
+        },
+        {
+            "type": "Pool2D",
+            "dimensions": [],
+            "filter_num": null,
+            "filter_size": [
+                "2",
+                "2"
+            ],
+            "stride": "2",
+            "padding": null,
+            "activation": null,
+            "nou": null
+        },
+        {
+            "type": "Dense",
+            "dimensions": [],
+            "filter_num": null,
+            "filter_size": [],
+            "stride": null,
+            "padding": null,
+            "activation": "relu",
+            "nou": 10
+        },
+        {
+            "type": "Output",
+            "dimensions": [],
+            "filter_num": null,
+            "filter_size": [],
+            "stride": null,
+            "padding": null,
+            "activation": "relu",
+            "nou": 10
+        }
+    ]
+}
