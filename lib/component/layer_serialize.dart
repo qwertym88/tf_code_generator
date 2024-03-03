@@ -15,16 +15,16 @@ class ModelInfo {
   String? optimizer;
   int? epoch;
   int? batch;
-  List<LayerInfo>? layers;
+  List<LayerInfo> layers;
 
   ModelInfo({
     required this.framework,
+    required this.layers,
     this.lr,
     this.loss,
     this.optimizer,
     this.epoch,
     this.batch,
-    this.layers,
   });
 
   factory ModelInfo.fromJson(Map<String, dynamic> json) => ModelInfo(
@@ -34,10 +34,8 @@ class ModelInfo {
         optimizer: json["optimizer"],
         epoch: json["epoch"],
         batch: json["batch"],
-        layers: json["layers"] == null
-            ? []
-            : List<LayerInfo>.from(
-                json["layers"]!.map((x) => LayerInfo.fromJson(x))),
+        layers: List<LayerInfo>.from(
+            json["layers"].map((x) => LayerInfo.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
@@ -47,9 +45,7 @@ class ModelInfo {
         "optimizer": optimizer,
         "epoch": epoch,
         "batch": batch,
-        "layers": layers == null
-            ? []
-            : List<dynamic>.from(layers!.map((x) => x.toJson())),
+        "layers": List<dynamic>.from(layers.map((x) => x.toJson())),
       };
 }
 
@@ -74,6 +70,7 @@ class LayerInfo {
     this.nou,
   });
 
+  // 访问不存在的key时返回null
   factory LayerInfo.fromJson(Map<String, dynamic> json) => LayerInfo(
         type: json["type"],
         dimensions: json["dimensions"] == null
@@ -104,6 +101,7 @@ class LayerInfo {
       "activation": activation,
       "nou": nou,
     };
+    // 专门去除空值，避免生成一堆"xxx":null
     map.removeWhere((key, value) => value == null);
     return map;
   }
