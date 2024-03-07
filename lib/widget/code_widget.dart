@@ -58,7 +58,8 @@ class _CodeWidgetState extends State<CodeWidget> {
   @override
   void initState() {
     super.initState();
-    int hash = GlobalVar.addLayer(0, LayerInfo(type: 'Input'));
+    int hash =
+        GlobalVar.addLayer(0, LayerInfo(type: 'Input')..dimensions = [28]);
     contacts.add(InputLayerWidget(
       hash: hash,
     ));
@@ -74,7 +75,7 @@ class _CodeWidgetState extends State<CodeWidget> {
           children: [
             contacts[index],
             IconButton(
-              icon: Icon(Icons.add),
+              icon: const Icon(Icons.add),
               onPressed: () {
                 showDialog(
                   context: context,
@@ -92,14 +93,15 @@ class _CodeWidgetState extends State<CodeWidget> {
                       actions: [
                         // 退出
                         TextButton(
-                          child: Text('Cancel'),
+                          child: const Text('Cancel'),
                           onPressed: () {
                             Navigator.of(context).pop();
                           },
                         ),
                         // 确认
                         TextButton(
-                          child: Text('Add'),
+                          child: const Text('Add'),
+                          // TODO: 选择插入的类型，先把其他层样式写好再说
                           onPressed: () => addNewLayer(index + 1),
                         ),
                       ],
@@ -108,7 +110,8 @@ class _CodeWidgetState extends State<CodeWidget> {
                 );
               },
             ),
-            Divider(),
+            // TODO: 想把层之间的搞好看点
+            const Divider(),
           ],
         );
       },

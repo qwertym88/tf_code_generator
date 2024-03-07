@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/widget/code_widget.dart';
-import 'package:flutter_application_1/widget/menu_widget.dart';
+import 'package:flutter_application_1/widget/leftmenu_widget.dart';
 import 'package:flutter_application_1/widget/toolbar_widget.dart';
 
 void main() {
@@ -52,20 +52,22 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(title: const Text('hello')),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          const minWidth = 100.0;
-          const maxWidth = 300.0;
-          return Row(children: <Widget>[
-            // TODO: 研究下到底怎么分配页面好看
-            SizedBox(
-              width: constraints.maxWidth > 980.0 ? 335 : 0,
-              child: const MenuWidget(),
-            ),
-            const Expanded(child: CodeWidget()),
-            SizedBox(
-              width: constraints.maxWidth > 980.0 ? 335 : 0,
-              child: const ToolbarWidget(),
-            ),
-          ]);
+          if (constraints.maxWidth > 980.0) {
+            return const Row(children: <Widget>[
+              // TODO: 研究下到底怎么分配页面好看
+              SizedBox(
+                width: 335,
+                child: LeftMenuWidget(),
+              ),
+              Expanded(child: CodeWidget()),
+              SizedBox(
+                width: 335,
+                child: ToolbarWidget(),
+              ),
+            ]);
+          } else {
+            return const CodeWidget();
+          }
         },
       ),
       // TODO: 非常想弄个可展开的fab，然后将功能全部放进去
