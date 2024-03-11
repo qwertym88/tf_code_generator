@@ -11,10 +11,30 @@ LayerInfo initLayer(String type) {
       return LayerInfo(type: type)
         ..activation = 'Relu'
         ..nou = 10;
+    case 'Conv2d':
+      return LayerInfo(type: type)
+        ..activation = 'Relu'
+        ..nou = 32
+        ..stride = 1
+        ..filterSize = [3, 3]
+        ..padding = 'valid';
     default:
       return LayerInfo(type: '');
   }
 }
+
+// 暂时写了不知道用在哪的代码
+// ListView.builder(
+// itemCount: validLayerType.length,
+// itemBuilder: (context, index) {
+//   return ListTile(
+//     leading: const Icon(Icons.abc),
+//     title: Text(validLayerType[index]),
+//     subtitle: const Text('123'),
+//     selected: selected == index,
+//     onTap: () => {selected = index},
+//   );
+// }),
 
 /// 中间的组件，图形化编程的主界面
 ///
@@ -28,14 +48,30 @@ class CodeWidget extends StatefulWidget {
 class _CodeWidgetState extends State<CodeWidget> {
   List<BaseLayerWidget> contacts = [];
 
+  final List<String> validLayerType = ['Dense', 'Output', 'Conv2d', 'Pool2d'];
+
   // 闭包保留index
-  void addNewLayer(int index) {
+  void addNewLayer(int index, String type) {
     // LayerWidget的initState方法有一个神奇的问题，只能把初始化放在这里
-    int hash = GlobalVar.addLayer(index, initLayer('Dense'));
-    var layer = DenseLayerWidget(
-      hash: hash,
-      deleteCallback: () => deleteLayer(hash),
-    );
+    int hash = GlobalVar.addLayer(index, initLayer(type));
+    BaseLayerWidget layer;
+    switch (type) {
+      case 'Dense':
+        layer = DenseLayerWidget(
+          hash: hash,
+          deleteCallback: () => deleteLayer(hash),
+        );
+      case 'Conv2d':
+        layer = Conv2dLayerWidget(
+          hash: hash,
+          deleteCallback: () => deleteLayer(hash),
+        );
+      default:
+        layer = DenseLayerWidget(
+          hash: hash,
+          deleteCallback: () => deleteLayer(hash),
+        );
+    }
     setState(() {
       // print('current place $index $hash');
       contacts.insert(index, layer);
@@ -54,6 +90,9 @@ class _CodeWidgetState extends State<CodeWidget> {
       // print(GlobalVar.modelInfo.toJson());
     });
   }
+
+  // 修改该层设置
+  // void selectLayer
 
   @override
   void initState() {
@@ -76,38 +115,54 @@ class _CodeWidgetState extends State<CodeWidget> {
             contacts[index],
             IconButton(
               icon: const Icon(Icons.add),
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    // 增加layer的弹窗
-                    TextEditingController controller = TextEditingController();
-                    return AlertDialog(
-                      title: const Text('Add Contact'),
-                      content: TextField(
-                        controller: controller,
-                        decoration: const InputDecoration(
-                          labelText: 'Name',
-                        ),
-                      ),
-                      actions: [
-                        // 退出
-                        TextButton(
-                          child: const Text('Cancel'),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                        // 确认
-                        TextButton(
-                          child: const Text('Add'),
-                          // TODO: 选择插入的类型，先把其他层样式写好再说
-                          onPressed: () => addNewLayer(index + 1),
-                        ),
-                      ],
-                    );
-                  },
-                );
+              onPressed: () async {
+                String selected = validLayerType[0];
+                await showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('选择待插入的层类型'),
+                        content: SizedBox(
+                            width: 400,
+                            height: 75,
+                            // 非要包一层listview才不会显示错位
+                            child: ListView(
+                              padding: const EdgeInsets.fromLTRB(50, 0, 50, 0),
+                              children: [
+                                DropdownMenu(
+                                  width: 300,
+                                  dropdownMenuEntries:
+                                      validLayerType.map((value) {
+                                    return DropdownMenuEntry(
+                                      value: value,
+                                      label: value,
+                                      leadingIcon:
+                                          const Icon(Icons.access_alarm),
+                                    );
+                                  }).toList(),
+                                  initialSelection: validLayerType[0],
+                                  // TODO: value=null时有bug，会吗？
+                                  onSelected: (value) => selected = value!,
+                                ),
+                              ],
+                            )),
+                        actions: [
+                          // 退出
+                          TextButton(
+                            child: const Text('Cancel'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                          // 确认
+                          TextButton(
+                            child: const Text('Add'),
+                            // TODO: 选择插入的类型，先把其他层样式写好再说
+                            onPressed: () => addNewLayer(index + 1, selected),
+                          ),
+                        ],
+                      );
+                    });
               },
             ),
             // TODO: 想把层之间的搞好看点

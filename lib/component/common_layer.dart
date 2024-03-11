@@ -30,9 +30,10 @@ Widget buildLayerLabel(
 
 // 为了偷懒把列表型参数的修改弄成同一种dialog
 class ListModifyDialog extends StatefulWidget {
-  const ListModifyDialog({super.key, required this.list});
+  const ListModifyDialog({super.key, required this.list, required this.label});
 
   final List<int> list;
+  final String label;
 
   @override
   State<ListModifyDialog> createState() => _InputDialogState();
@@ -76,7 +77,7 @@ class _InputDialogState extends State<ListModifyDialog> {
     // 确定ListView长度
     inputDimension = widget.list.length;
     return AlertDialog(
-      title: const Text('Input层设置'),
+      title: Text(widget.label),
       content: SizedBox(
         width: 400,
         height: 300,
@@ -102,18 +103,22 @@ class _InputDialogState extends State<ListModifyDialog> {
                           icon: const Icon(Icons.remove))
                     ],
                   ),
-                  const SizedBox(height: 10),
                 ]);
               } else if (index == inputDimension) {
-                return ElevatedButton.icon(
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add dimensionality'),
-                  onPressed: () {
-                    setState(() {
-                      inputDimension++;
-                      widget.list.add(0);
-                    });
-                  },
+                return Column(
+                  children: [
+                    const SizedBox(height: 10),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add dimensionality'),
+                      onPressed: () {
+                        setState(() {
+                          inputDimension++;
+                          widget.list.add(0);
+                        });
+                      },
+                    ),
+                  ],
                 );
               } else {
                 return Column(children: [
@@ -163,7 +168,10 @@ class _InputLayerWidgetState extends State<InputLayerWidget> {
     await showDialog(
         context: context,
         builder: (BuildContext context) {
-          return ListModifyDialog(list: layerInfo.dimensions!);
+          return ListModifyDialog(
+            list: layerInfo.dimensions!,
+            label: 'Input层设置',
+          );
         });
     print(layerInfo.toJson());
     setState(() {});
@@ -179,24 +187,24 @@ class _InputLayerWidgetState extends State<InputLayerWidget> {
       child: Center(
         child: Column(children: [
           // 特殊的LayerLabel，少一个删除按钮
+          Text(
+            widget.type,
+            style: AppStyle.layerLabelTextStyle,
+          ),
+          // 具体内容
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              IconButton(
-                onPressed: modifyCallback,
-                icon: const Icon(Icons.settings),
-              ),
               Text(
-                widget.type,
-                style: AppStyle.layerLabelTextStyle,
-              )
+                'Input Shape: ${layerInfo.dimensions}',
+                style: AppStyle.layerContextTextStyle,
+              ),
+              IconButton(
+                  iconSize: 18.0,
+                  onPressed: modifyCallback,
+                  icon: const Icon(Icons.border_color))
             ],
-          ),
-          // 具体内容
-          Text(
-            'Input Shape: ${layerInfo.dimensions}',
-            style: AppStyle.layerContextTextStyle,
-          ),
+          )
         ]),
       ),
     );
@@ -255,21 +263,19 @@ class _DenseLayerWidgetState extends State<DenseLayerWidget> {
                     const SizedBox(height: 25),
                     TextField(
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      decoration: const InputDecoration(
-                        labelText: '神经元数',
-                        // hintText: '123',
-                        prefixIcon: Icon(Icons.share),
-                      ),
+                      decoration: InputDecoration(
+                          labelText: '神经元数',
+                          // helperText: '神经元数',
+                          prefixIcon: const Icon(Icons.share),
+                          hintText: layerInfo.nou.toString()),
+                      onChanged: (value) {
+                        layerInfo.nou =
+                            value.isEmpty ? layerInfo.nou : int.parse(value);
+                      },
                     )
                   ]),
             ),
             actions: [
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Cancel'),
-              ), // 取消
               ElevatedButton(
                 onPressed: () {
                   setState(() {});
@@ -340,6 +346,165 @@ class _OutputLayerWidgetState extends State<OutputLayerWidget> {
             'Activation: ${layerInfo.activation}',
             style: AppStyle.layerContextTextStyle,
           )
+        ]),
+      ),
+    );
+  }
+}
+
+// Dense Layer
+class Conv2dLayerWidget extends BaseLayerWidget {
+  const Conv2dLayerWidget(
+      {super.key, required super.hash, required this.deleteCallback});
+
+  // 实现'按下按钮后删除自己'的行为
+  final void Function() deleteCallback;
+  final String type = 'Conv2d';
+
+  @override
+  State<Conv2dLayerWidget> createState() => _Conv2dLayerWidgetState();
+}
+
+class _Conv2dLayerWidgetState extends State<Conv2dLayerWidget> {
+  late LayerInfo layerInfo;
+
+  final List<String> validActType = ['Relu', 'Tanh'];
+  final List<String> validPadding = ['valid', 'null'];
+
+  // 修改该层设置
+  void modifyCallback() async {
+    await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Dense层设置'),
+            content: SizedBox(
+              width: 400,
+              height: 300,
+              child: ListView(
+                  // TODO: 感觉居中后没那么好看，再多想想？
+                  padding: const EdgeInsets.fromLTRB(75, 0, 75, 0),
+                  children: [
+                    const SizedBox(height: 25),
+                    // 激活层设置
+                    DropdownMenu(
+                      dropdownMenuEntries: validActType.map((value) {
+                        return DropdownMenuEntry(
+                          value: value,
+                          label: value,
+                          // TODO: 合适的icon好难找，干脆不要得了
+                          leadingIcon: const Icon(Icons.access_alarm),
+                        );
+                      }).toList(),
+                      width: 250,
+                      initialSelection: layerInfo.activation,
+                      label: const Text('激活层'),
+                      onSelected: (value) => layerInfo.activation = value,
+                    ),
+                    const SizedBox(height: 25),
+                    // 激活层设置
+                    DropdownMenu(
+                      dropdownMenuEntries: validPadding.map((value) {
+                        return DropdownMenuEntry(
+                          value: value,
+                          label: value,
+                          leadingIcon: const Icon(Icons.access_alarm),
+                        );
+                      }).toList(),
+                      width: 250,
+                      initialSelection: layerInfo.padding,
+                      label: const Text('Padding'),
+                      onSelected: (value) => layerInfo.padding = value,
+                    ),
+                    TextField(
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      decoration: InputDecoration(
+                        labelText: '神经元数',
+                        prefixIcon: const Icon(Icons.share),
+                        hintText: layerInfo.nou.toString(),
+                      ),
+                      onChanged: (value) {
+                        layerInfo.nou =
+                            value.isEmpty ? layerInfo.nou : int.parse(value);
+                      },
+                    ),
+                    TextField(
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      decoration: InputDecoration(
+                        labelText: 'Stride',
+                        prefixIcon: const Icon(Icons.share),
+                        hintText: layerInfo.stride.toString(),
+                      ),
+                      onChanged: (value) {
+                        layerInfo.stride =
+                            value.isEmpty ? layerInfo.stride : int.parse(value);
+                      },
+                    ),
+                  ]),
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {});
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Save'),
+              ), // 确认
+            ],
+          );
+        });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    layerInfo = GlobalVar.getLayer(widget.hash);
+    // Conv2dLayerWidget显示效果
+    return Container(
+      padding: const EdgeInsets.fromLTRB(0, 20, 0, 20),
+      height: 250,
+      child: Center(
+        child: Column(children: [
+          buildLayerLabel(widget.type, modifyCallback, widget.deleteCallback),
+          // 具体内容
+          Text(
+            'Number of fliters: ${layerInfo.nou}',
+            style: AppStyle.layerContextTextStyle,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Fliter Size: ${layerInfo.filterSize}',
+                style: AppStyle.layerContextTextStyle,
+              ),
+              IconButton(
+                  iconSize: 18.0,
+                  onPressed: () async {
+                    await showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return ListModifyDialog(
+                            list: layerInfo.filterSize!,
+                            label: 'Fliter Size设置',
+                          );
+                        });
+                    setState(() {});
+                  },
+                  icon: const Icon(Icons.border_color))
+            ],
+          ),
+          Text(
+            'Stride: ${layerInfo.stride}',
+            style: AppStyle.layerContextTextStyle,
+          ),
+          Text(
+            'Padding: ${layerInfo.padding}',
+            style: AppStyle.layerContextTextStyle,
+          ),
+          Text(
+            'Activation: ${layerInfo.activation}',
+            style: AppStyle.layerContextTextStyle,
+          ),
         ]),
       ),
     );

@@ -53,8 +53,8 @@ class LayerInfo {
   String type;
   List<int>? dimensions;
   int? filterNum;
-  List<dynamic>? filterSize;
-  dynamic stride;
+  List<int>? filterSize;
+  int? stride;
   String? padding;
   String? activation;
   int? nou;
@@ -79,7 +79,7 @@ class LayerInfo {
         filterNum: json["filter_num"],
         filterSize: json["filter_size"] == null
             ? null
-            : List<dynamic>.from(json["filter_size"]!.map((x) => x)),
+            : List<int>.from(json["filter_size"]!.map((x) => x)),
         stride: json["stride"],
         padding: json["padding"],
         activation: json["activation"],
@@ -89,13 +89,11 @@ class LayerInfo {
   Map<String, dynamic> toJson() {
     var map = {
       "type": type,
-      "dimensions": dimensions == null
-          ? null
-          : List<dynamic>.from(dimensions!.map((x) => x)),
+      "dimensions":
+          dimensions == null ? null : List<int>.from(dimensions!.map((x) => x)),
       "filter_num": filterNum,
-      "filter_size": filterSize == null
-          ? null
-          : List<dynamic>.from(filterSize!.map((x) => x)),
+      "filter_size":
+          filterSize == null ? null : List<int>.from(filterSize!.map((x) => x)),
       "stride": stride,
       "padding": padding,
       "activation": activation,
