@@ -18,6 +18,15 @@ LayerInfo initLayer(String type) {
         ..stride = 1
         ..filterSize = [3, 3]
         ..padding = 'valid';
+    case 'Pool2d':
+      return LayerInfo(type: type)
+        ..stride = 1
+        ..filterSize = [3, 3]
+        ..pooling = 'MaxPooling';
+    case 'Output':
+      return LayerInfo(type: type)
+        ..activation = 'Sigmoid'
+        ..nou = 10;
     default:
       return LayerInfo(type: '');
   }
@@ -63,6 +72,17 @@ class _CodeWidgetState extends State<CodeWidget> {
         );
       case 'Conv2d':
         layer = Conv2dLayerWidget(
+          hash: hash,
+          deleteCallback: () => deleteLayer(hash),
+        );
+      case 'Pool2d':
+        layer = Pool2dLayerWidget(
+          hash: hash,
+          deleteCallback: () => deleteLayer(hash),
+        );
+        break;
+      case 'Output':
+        layer = OutputLayerWidget(
           hash: hash,
           deleteCallback: () => deleteLayer(hash),
         );

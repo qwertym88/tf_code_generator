@@ -8,11 +8,13 @@ ModelInfo modelInfoFromJson(String str) => ModelInfo.fromJson(json.decode(str));
 
 String modelInfoToJson(ModelInfo data) => json.encode(data.toJson());
 
+// TODO: layer_serialize添加datasets  已添加待测试
 class ModelInfo {
   String framework;
   double? lr;
   String? loss;
   String? optimizer;
+  String? dataset;
   int? epoch;
   int? batch;
   List<LayerInfo> layers;
@@ -23,6 +25,7 @@ class ModelInfo {
     this.lr,
     this.loss,
     this.optimizer,
+    this.dataset,
     this.epoch,
     this.batch,
   });
@@ -32,6 +35,7 @@ class ModelInfo {
         lr: json["lr"]?.toDouble(),
         loss: json["loss"],
         optimizer: json["optimizer"],
+        dataset: json["dataset"],
         epoch: json["epoch"],
         batch: json["batch"],
         layers: List<LayerInfo>.from(
@@ -43,6 +47,7 @@ class ModelInfo {
         "lr": lr,
         "loss": loss,
         "optimizer": optimizer,
+        "dataset": dataset,
         "epoch": epoch,
         "batch": batch,
         "layers": List<dynamic>.from(layers.map((x) => x.toJson())),
@@ -57,6 +62,7 @@ class LayerInfo {
   int? stride;
   String? padding;
   String? activation;
+  String? pooling;
   int? nou;
 
   LayerInfo({
@@ -67,6 +73,7 @@ class LayerInfo {
     this.stride,
     this.padding,
     this.activation,
+    this.pooling,
     this.nou,
   });
 
@@ -83,6 +90,7 @@ class LayerInfo {
         stride: json["stride"],
         padding: json["padding"],
         activation: json["activation"],
+        pooling: json["pooling"],
         nou: json["nou"],
       );
 
@@ -97,6 +105,7 @@ class LayerInfo {
       "stride": stride,
       "padding": padding,
       "activation": activation,
+      "pooling": pooling,
       "nou": nou,
     };
     // 专门去除空值，避免生成一堆"xxx":null

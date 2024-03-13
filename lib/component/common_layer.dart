@@ -320,7 +320,7 @@ class OutputLayerWidget extends BaseLayerWidget {
       {super.key, required super.hash, required this.deleteCallback});
 
   final void Function() deleteCallback;
-  final String name = 'Output';
+  final String type = 'Output';
 
   @override
   State<OutputLayerWidget> createState() => _OutputLayerWidgetState();
@@ -331,28 +331,88 @@ class _OutputLayerWidgetState extends State<OutputLayerWidget> {
 
   final List<String> validActType = ['Softmax', 'Sigmoid'];
 
-  void modifyCallback() {}
+  // 修改该层设置
+  void modifyCallback() async {
+    await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Output层设置'),
+            content: SizedBox(
+              width: 400,
+              height: 300,
+              child: ListView(
+                  padding: const EdgeInsets.fromLTRB(75, 0, 75, 0),
+                  children: [
+                    const SizedBox(height: 25),
+                    // 激活层设置
+                    DropdownMenu(
+                      dropdownMenuEntries: validActType.map((value) {
+                        return DropdownMenuEntry(
+                          value: value,
+                          label: value,
+                          leadingIcon: const Icon(Icons.access_alarm),
+                        );
+                      }).toList(),
+                      width: 250,
+                      initialSelection: layerInfo.activation,
+                      label: const Text('激活层'),
+                      onSelected: (value) => layerInfo.activation = value,
+                    ),
+                    // 用SizedBox填padding
+                    const SizedBox(height: 25),
+                    TextField(
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      decoration: InputDecoration(
+                          labelText: '神经元数',
+                          prefixIcon: const Icon(Icons.share),
+                          hintText: layerInfo.nou.toString()),
+                      onChanged: (value) {
+                        layerInfo.nou =
+                            value.isEmpty ? layerInfo.nou : int.parse(value);
+                      },
+                    )
+                  ]),
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {});
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Save'),
+              ), // 确认
+            ],
+          );
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
     layerInfo = GlobalVar.getLayer(widget.hash);
+    // DenseLayerWidget显示效果
     return Container(
       padding: const EdgeInsets.fromLTRB(0, 20, 0, 20),
       height: 150,
       child: Center(
         child: Column(children: [
-          buildLayerLabel(widget.name, modifyCallback, widget.deleteCallback),
+          buildLayerLabel(widget.type, modifyCallback, widget.deleteCallback),
+          // 具体内容
+          Text(
+            'Number of Units: ${layerInfo.nou}',
+            style: AppStyle.layerContextTextStyle,
+          ),
           Text(
             'Activation: ${layerInfo.activation}',
             style: AppStyle.layerContextTextStyle,
-          )
+          ),
         ]),
       ),
     );
   }
 }
 
-// Dense Layer
+// Conv2d Layer
 class Conv2dLayerWidget extends BaseLayerWidget {
   const Conv2dLayerWidget(
       {super.key, required super.hash, required this.deleteCallback});
@@ -377,12 +437,11 @@ class _Conv2dLayerWidgetState extends State<Conv2dLayerWidget> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Dense层设置'),
+            title: const Text('Conv2d层设置'),
             content: SizedBox(
               width: 400,
               height: 300,
               child: ListView(
-                  // TODO: 感觉居中后没那么好看，再多想想？
                   padding: const EdgeInsets.fromLTRB(75, 0, 75, 0),
                   children: [
                     const SizedBox(height: 25),
@@ -392,7 +451,6 @@ class _Conv2dLayerWidgetState extends State<Conv2dLayerWidget> {
                         return DropdownMenuEntry(
                           value: value,
                           label: value,
-                          // TODO: 合适的icon好难找，干脆不要得了
                           leadingIcon: const Icon(Icons.access_alarm),
                         );
                       }).toList(),
@@ -402,7 +460,7 @@ class _Conv2dLayerWidgetState extends State<Conv2dLayerWidget> {
                       onSelected: (value) => layerInfo.activation = value,
                     ),
                     const SizedBox(height: 25),
-                    // 激活层设置
+                    // Padding设置
                     DropdownMenu(
                       dropdownMenuEntries: validPadding.map((value) {
                         return DropdownMenuEntry(
@@ -416,6 +474,43 @@ class _Conv2dLayerWidgetState extends State<Conv2dLayerWidget> {
                       label: const Text('Padding'),
                       onSelected: (value) => layerInfo.padding = value,
                     ),
+                    // filterSize设置
+                    Row(
+                      children: [
+                        const Text('Filter Size:    '),
+                        Expanded(
+                            child: TextField(
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          decoration: InputDecoration(
+                            hintText: layerInfo.filterSize![0].toString(),
+                          ),
+                          textAlign: TextAlign.center,
+                          onChanged: (value) {
+                            layerInfo.filterSize![0] = value.isEmpty
+                                ? layerInfo.filterSize![0]
+                                : int.parse(value);
+                          },
+                        )),
+                        Expanded(
+                            child: TextField(
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          decoration: InputDecoration(
+                            hintText: layerInfo.filterSize![1].toString(),
+                          ),
+                          textAlign: TextAlign.center,
+                          onChanged: (value) {
+                            layerInfo.filterSize![1] = value.isEmpty
+                                ? layerInfo.filterSize![1]
+                                : int.parse(value);
+                          },
+                        )),
+                      ],
+                    ),
+                    // 神经元数设置
                     TextField(
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       decoration: InputDecoration(
@@ -428,6 +523,7 @@ class _Conv2dLayerWidgetState extends State<Conv2dLayerWidget> {
                             value.isEmpty ? layerInfo.nou : int.parse(value);
                       },
                     ),
+                    // Stride设置
                     TextField(
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       decoration: InputDecoration(
@@ -461,7 +557,7 @@ class _Conv2dLayerWidgetState extends State<Conv2dLayerWidget> {
     // Conv2dLayerWidget显示效果
     return Container(
       padding: const EdgeInsets.fromLTRB(0, 20, 0, 20),
-      height: 250,
+      height: 230,
       child: Center(
         child: Column(children: [
           buildLayerLabel(widget.type, modifyCallback, widget.deleteCallback),
@@ -470,29 +566,30 @@ class _Conv2dLayerWidgetState extends State<Conv2dLayerWidget> {
             'Number of fliters: ${layerInfo.nou}',
             style: AppStyle.layerContextTextStyle,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Fliter Size: ${layerInfo.filterSize}',
-                style: AppStyle.layerContextTextStyle,
-              ),
-              IconButton(
-                  iconSize: 18.0,
-                  onPressed: () async {
-                    await showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return ListModifyDialog(
-                            list: layerInfo.filterSize!,
-                            label: 'Fliter Size设置',
-                          );
-                        });
-                    setState(() {});
-                  },
-                  icon: const Icon(Icons.border_color))
-            ],
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.center,
+          //   children: [
+          Text(
+            'Fliter Size: ${layerInfo.filterSize}',
+            style: AppStyle.layerContextTextStyle,
           ),
+          // TODO: 由于filterSize维度是固定的，或许不需要这样？
+          //     IconButton(
+          //         iconSize: 18.0,
+          //         onPressed: () async {
+          //           await showDialog(
+          //               context: context,
+          //               builder: (BuildContext context) {
+          //                 return ListModifyDialog(
+          //                   list: layerInfo.filterSize!,
+          //                   label: 'Fliter Size设置',
+          //                 );
+          //               });
+          //           setState(() {});
+          //         },
+          //         icon: const Icon(Icons.border_color))
+          //   ],
+          // ),
           Text(
             'Stride: ${layerInfo.stride}',
             style: AppStyle.layerContextTextStyle,
@@ -503,6 +600,147 @@ class _Conv2dLayerWidgetState extends State<Conv2dLayerWidget> {
           ),
           Text(
             'Activation: ${layerInfo.activation}',
+            style: AppStyle.layerContextTextStyle,
+          ),
+        ]),
+      ),
+    );
+  }
+}
+
+// Pool2d Layer
+class Pool2dLayerWidget extends BaseLayerWidget {
+  const Pool2dLayerWidget(
+      {super.key, required super.hash, required this.deleteCallback});
+
+  // 实现'按下按钮后删除自己'的行为
+  final void Function() deleteCallback;
+  final String type = 'Pool2d';
+
+  @override
+  State<Pool2dLayerWidget> createState() => _Pool2dLayerWidgetState();
+}
+
+class _Pool2dLayerWidgetState extends State<Pool2dLayerWidget> {
+  late LayerInfo layerInfo;
+
+  final List<String> validPoolType = ['MaxPooling', 'AvaragePooling'];
+
+  // 修改该层设置
+  void modifyCallback() async {
+    await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Pool2d层设置'),
+            content: SizedBox(
+              width: 400,
+              height: 300,
+              child: ListView(
+                  padding: const EdgeInsets.fromLTRB(75, 0, 75, 0),
+                  children: [
+                    const SizedBox(height: 25),
+                    // 激活层设置
+                    DropdownMenu(
+                      dropdownMenuEntries: validPoolType.map((value) {
+                        return DropdownMenuEntry(
+                          value: value,
+                          label: value,
+                          leadingIcon: const Icon(Icons.access_alarm),
+                        );
+                      }).toList(),
+                      width: 250,
+                      initialSelection: layerInfo.activation,
+                      label: const Text('Pooling'),
+                      // TODO: layer_serialize添加pooling种类 已添加待测试
+                      onSelected: (value) {},
+                    ),
+                    const SizedBox(height: 25),
+                    // filterSize设置
+                    Row(
+                      children: [
+                        const Text('Filter Size:    '),
+                        Expanded(
+                            child: TextField(
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          decoration: InputDecoration(
+                            hintText: layerInfo.filterSize![0].toString(),
+                          ),
+                          textAlign: TextAlign.center,
+                          onChanged: (value) {
+                            layerInfo.filterSize![0] = value.isEmpty
+                                ? layerInfo.filterSize![0]
+                                : int.parse(value);
+                          },
+                        )),
+                        Expanded(
+                            child: TextField(
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          decoration: InputDecoration(
+                            hintText: layerInfo.filterSize![1].toString(),
+                          ),
+                          textAlign: TextAlign.center,
+                          onChanged: (value) {
+                            layerInfo.filterSize![1] = value.isEmpty
+                                ? layerInfo.filterSize![1]
+                                : int.parse(value);
+                          },
+                        )),
+                      ],
+                    ),
+                    // Stride设置
+                    TextField(
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      decoration: InputDecoration(
+                        labelText: 'Stride',
+                        prefixIcon: const Icon(Icons.share),
+                        hintText: layerInfo.stride.toString(),
+                      ),
+                      onChanged: (value) {
+                        layerInfo.stride =
+                            value.isEmpty ? layerInfo.stride : int.parse(value);
+                      },
+                    ),
+                  ]),
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {});
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Save'),
+              ), // 确认
+            ],
+          );
+        });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    layerInfo = GlobalVar.getLayer(widget.hash);
+    // Pool2dLayerWidget显示效果
+    return Container(
+      padding: const EdgeInsets.fromLTRB(0, 20, 0, 20),
+      height: 180,
+      child: Center(
+        child: Column(children: [
+          buildLayerLabel(widget.type, modifyCallback, widget.deleteCallback),
+          // 具体内容
+          Text(
+            'Fliter Size: ${layerInfo.filterSize}',
+            style: AppStyle.layerContextTextStyle,
+          ),
+          Text(
+            'Stride: ${layerInfo.stride}',
+            style: AppStyle.layerContextTextStyle,
+          ),
+          Text(
+            'Pooling: ${layerInfo.pooling}',
             style: AppStyle.layerContextTextStyle,
           ),
         ]),
