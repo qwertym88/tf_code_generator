@@ -84,7 +84,6 @@ class _LeftMenuWidgetState extends State<LeftMenuWidget> {
                     fileName: 'diagram1.txt',
                     dialogTitle: 'Save Diagram');
                 if (outputPath != null) {
-                  print('Selected folder path: $outputPath');
                   File file = await File(outputPath).create();
                   file.writeAsStringSync(modelInfoToJson(GlobalVar.modelInfo));
                 }

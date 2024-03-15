@@ -7,7 +7,8 @@ class GlobalVar {
         ..epoch = 20
         ..loss = 'SGD'
         ..lr = 0.001
-        ..optimizer = 'adam';
+        ..optimizer = 'adam'
+        ..dataset = 'minst';
 
   // 按照index插入list，返回hash
   static int addLayer(int index, LayerInfo layer) {

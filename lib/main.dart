@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/widget/code_widget.dart';
 import 'package:flutter_application_1/widget/leftmenu_widget.dart';
-import 'package:flutter_application_1/widget/toolbar_widget.dart';
+import 'package:flutter_application_1/widget/rightmenu_widget.dart';
 
 void main() {
   runApp(const MyApp());
@@ -62,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
               Expanded(child: CodeWidget()),
               SizedBox(
                 width: 335,
-                child: ToolbarWidget(),
+                child: RightMenuWidget(),
               ),
             ]);
           } else {

@@ -9,5 +9,5 @@ class AppStyle {
   static const TextStyle menuHeaderTextStyle =
       TextStyle(fontSize: 28, color: Colors.redAccent);
   static const TextStyle hintTextStyle =
-      TextStyle(fontSize: 24, color: Colors.redAccent);
+      TextStyle(fontSize: 18, color: Colors.purpleAccent);
 }
