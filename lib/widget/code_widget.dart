@@ -3,7 +3,8 @@ import 'package:flutter_application_1/component/common_layer.dart';
 import 'package:flutter_application_1/component/global.dart';
 import 'package:flutter_application_1/component/layer_serialize.dart';
 
-LayerInfo initLayer(String type) {
+// LayerWidget的initState方法有一个神奇的问题，只能把初始化放在这里
+LayerInfo initLayerInfo(String type) {
   switch (type) {
     case 'Input':
       return LayerInfo(type: type)..dimensions = [1, 28, 28];
@@ -51,68 +52,98 @@ class CodeWidget extends StatefulWidget {
   const CodeWidget({super.key});
 
   @override
-  State<CodeWidget> createState() => _CodeWidgetState();
+  State<CodeWidget> createState() => CodeWidgetState();
 }
 
-class _CodeWidgetState extends State<CodeWidget> {
+class CodeWidgetState extends State<CodeWidget> {
   List<BaseLayerWidget> contacts = [];
 
   final List<String> validLayerType = ['Dense', 'Output', 'Conv2d', 'Pool2d'];
 
   // 闭包保留index
-  void addNewLayer(int index, String type) {
-    // LayerWidget的initState方法有一个神奇的问题，只能把初始化放在这里
-    int hash = GlobalVar.addLayer(index, initLayer(type));
-    BaseLayerWidget layer;
-    switch (type) {
+  void addNewLayer(int index, LayerInfo info) {
+    int hash = GlobalVar.addLayer(index, info);
+    BaseLayerWidget widget;
+    switch (info.type) {
       case 'Dense':
-        layer = DenseLayerWidget(
+        widget = DenseLayerWidget(
           hash: hash,
           deleteCallback: () => deleteLayer(hash),
         );
       case 'Conv2d':
-        layer = Conv2dLayerWidget(
+        widget = Conv2dLayerWidget(
           hash: hash,
           deleteCallback: () => deleteLayer(hash),
         );
       case 'Pool2d':
-        layer = Pool2dLayerWidget(
+        widget = Pool2dLayerWidget(
           hash: hash,
           deleteCallback: () => deleteLayer(hash),
         );
         break;
       case 'Output':
-        layer = OutputLayerWidget(
+        widget = OutputLayerWidget(
           hash: hash,
           deleteCallback: () => deleteLayer(hash),
         );
       default:
-        layer = DenseLayerWidget(
+        widget = DenseLayerWidget(
           hash: hash,
           deleteCallback: () => deleteLayer(hash),
         );
     }
     setState(() {
-      // print('current place $index $hash');
-      contacts.insert(index, layer);
+      contacts.insert(index, widget);
       Navigator.of(context).pop();
     });
-    // print(GlobalVar.modelInfo.toJson());
-    // for (int i = 0; i < contacts.length; i++) {
-    //   print('$i: ${contacts[i].hash}, ${contacts[i].hashCode}');
-    // }
   }
 
   void deleteLayer(int hash) {
     setState(() {
       contacts.removeWhere((element) => element.hash == hash);
       GlobalVar.removeLayer(hash);
-      // print(GlobalVar.modelInfo.toJson());
     });
   }
 
-  // 修改该层设置
-  // void selectLayer
+  // load diagram后更新code widget显示效果
+  void buildByList(List<LayerInfo> layers) {
+    contacts.clear();
+    setState(() {
+      for (LayerInfo info in layers) {
+        int hash = info.hashCode;
+        BaseLayerWidget widget;
+        switch (info.type) {
+          case 'Dense':
+            widget = DenseLayerWidget(
+              hash: hash,
+              deleteCallback: () => deleteLayer(hash),
+            );
+          case 'Conv2d':
+            widget = Conv2dLayerWidget(
+              hash: hash,
+              deleteCallback: () => deleteLayer(hash),
+            );
+          case 'Pool2d':
+            widget = Pool2dLayerWidget(
+              hash: hash,
+              deleteCallback: () => deleteLayer(hash),
+            );
+            break;
+          case 'Output':
+            widget = OutputLayerWidget(
+              hash: hash,
+              deleteCallback: () => deleteLayer(hash),
+            );
+          default:
+            widget = DenseLayerWidget(
+              hash: hash,
+              deleteCallback: () => deleteLayer(hash),
+            );
+        }
+        contacts.add(widget);
+      }
+    });
+  }
 
   @override
   void initState() {
@@ -126,7 +157,6 @@ class _CodeWidgetState extends State<CodeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: 编写页面内容
     return ListView.builder(
       itemCount: contacts.length,
       itemBuilder: (context, index) {
@@ -136,6 +166,7 @@ class _CodeWidgetState extends State<CodeWidget> {
             IconButton(
               icon: const Icon(Icons.add),
               onPressed: () async {
+                // 待添加的layer type
                 String selected = validLayerType[0];
                 await showDialog(
                     context: context,
@@ -177,8 +208,8 @@ class _CodeWidgetState extends State<CodeWidget> {
                           // 确认
                           TextButton(
                             child: const Text('Add'),
-                            // TODO: 选择插入的类型，先把其他层样式写好再说
-                            onPressed: () => addNewLayer(index + 1, selected),
+                            onPressed: () =>
+                                addNewLayer(index + 1, initLayerInfo(selected)),
                           ),
                         ],
                       );

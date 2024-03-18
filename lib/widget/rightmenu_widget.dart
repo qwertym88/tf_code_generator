@@ -10,13 +10,17 @@ class RightMenuWidget extends StatefulWidget {
   const RightMenuWidget({super.key});
 
   @override
-  State<RightMenuWidget> createState() => _RightMenuWidgetState();
+  State<RightMenuWidget> createState() => RightMenuWidgetState();
 }
 
-class _RightMenuWidgetState extends State<RightMenuWidget> {
+class RightMenuWidgetState extends State<RightMenuWidget> {
   late ModelInfo model;
 
   final List<String> validLossType = ['MSE', 'CE'];
+
+  void rebuild() {
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {

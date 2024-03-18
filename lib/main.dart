@@ -1,4 +1,8 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/component/global.dart';
 import 'package:flutter_application_1/widget/code_widget.dart';
 import 'package:flutter_application_1/widget/leftmenu_widget.dart';
 import 'package:flutter_application_1/widget/rightmenu_widget.dart';
@@ -34,16 +38,14 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int cnt = 0;
 
-  void increase() {
-    setState(() {
-      cnt++;
-    });
-  }
+  // Widget code = const CodeWidget();
+  // Widget rightmenu = const RightMenuWidget();
+  final GlobalKey<CodeWidgetState> _codeWidgetKey = GlobalKey();
+  final GlobalKey<RightMenuWidgetState> _rightWidgetKey = GlobalKey();
 
-  void clearCnt() {
-    setState(() {
-      cnt = 0;
-    });
+  void loadDiagram() {
+    _codeWidgetKey.currentState?.buildByList(GlobalVar.modelInfo.layers);
+    _rightWidgetKey.currentState?.rebuild();
   }
 
   @override
@@ -53,28 +55,40 @@ class _MyHomePageState extends State<MyHomePage> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           if (constraints.maxWidth > 980.0) {
-            return const Row(children: <Widget>[
+            return Row(children: <Widget>[
               // TODO: 研究下到底怎么分配页面好看
               SizedBox(
                 width: 335,
-                child: LeftMenuWidget(),
+                child: LeftMenuWidget(rebuildCallback: loadDiagram),
               ),
-              Expanded(child: CodeWidget()),
+              Expanded(child: CodeWidget(key: _codeWidgetKey)),
               SizedBox(
                 width: 335,
-                child: RightMenuWidget(),
+                child: RightMenuWidget(key: _rightWidgetKey),
               ),
             ]);
           } else {
-            return const CodeWidget();
+            return CodeWidget(key: _codeWidgetKey);
           }
         },
       ),
       // TODO: 非常想弄个可展开的fab，然后将功能全部放进去
-      floatingActionButton: const IconButton(
-        icon: Icon(Icons.add),
-        onPressed: null,
-      ),
+      floatingActionButton: IconButton(
+          icon: const Icon(Icons.arrow_right),
+          iconSize: 64,
+          tooltip: 'Generate Code',
+          onPressed: () async {
+            String? outputPath = await FilePicker.platform.saveFile(
+                type: FileType.custom,
+                allowedExtensions: ['py'],
+                lockParentWindow: true,
+                fileName: 'code.py',
+                dialogTitle: 'Genenate Code');
+            if (outputPath != null) {
+              File file = await File(outputPath).create();
+              file.writeAsStringSync(generate(GlobalVar.modelInfo));
+            }
+          }),
     );
   }
 }

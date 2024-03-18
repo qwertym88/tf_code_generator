@@ -24,6 +24,10 @@ class GlobalVar {
   static LayerInfo getLayer(int hash) {
     return modelInfo.layers.firstWhere((element) => element.hashCode == hash);
   }
+
+  static int getHash(int index) {
+    return modelInfo.layers[index].hashCode;
+  }
 }
 
 // 生成python代码
@@ -61,30 +65,33 @@ String generate(ModelInfo model) {
       //linear case
       case 'Dense':
         code +=
-            'model.add(Dense(${layer.nou!}, activation = \'${layer.activation!.toLowerCase()}\'))';
+            'model.add(Dense(${layer.nou!}, activation = \'${layer.activation!.toLowerCase()}\'))\n';
         break;
 
       //convolution 2D case
       case 'Conv2d':
         code +=
-            'model.add(Conv2D(${layer.filterNum!}, (${layer.filterSize![0]}, ${layer.filterSize![1]}), strides = ${layer.stride!}, activation = \'${layer.activation!.toLowerCase()}\', padding = \'${layer.padding}\'))';
+            'model.add(Conv2D(${layer.nou!}, (${layer.filterSize![0]}, ${layer.filterSize![1]}), strides = ${layer.stride!}, activation = \'${layer.activation!.toLowerCase()}\', padding = \'${layer.padding}\'))\n';
         break;
 
       //pool 2D case
-      case 'Max Pool 2D':
+      case 'Pool2d':
         if (layer.pooling! == 'MaxPooling') {
           code +=
-              'model.add(MaxPooling2D((${layer.filterSize![0]}, ${layer.filterSize![1]}), strides = ${layer.stride}))';
+              'model.add(MaxPooling2D((${layer.filterSize![0]}, ${layer.filterSize![1]}), strides = ${layer.stride}))\n';
         } else if (layer.pooling! == 'AvePooling') {
           code +=
-              'model.add(AvePooling((${layer.filterSize![0]}, ${layer.filterSize![1]}), strides = ${layer.stride}))';
+              'model.add(AvePooling((${layer.filterSize![0]}, ${layer.filterSize![1]}), strides = ${layer.stride}))\n';
         }
         break;
 
       //output case
       case 'Output':
         code +=
-            'model.add(Dense(${layer.nou!}, activation = \'${layer.activation!.toLowerCase()}\'))';
+            'model.add(Dense(${layer.nou!}, activation = \'${layer.activation!.toLowerCase()}\'))\n';
+        break;
+
+      default:
         break;
 
       //         //convolution 1D case
@@ -168,8 +175,6 @@ String generate(ModelInfo model) {
       //             }
       //             code += 'model.add(SimpleRNN(units = ${layer.units}, activations = '${layer.activation}', return_sequences = ${ret_seq}))';
       //             break;
-      default:
-        break;
     }
   }
   code += '\nmodel.summary()\n\n';

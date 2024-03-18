@@ -7,7 +7,9 @@ import 'package:flutter_application_1/component/layer_serialize.dart';
 import 'package:flutter_application_1/style/style.dart';
 
 class LeftMenuWidget extends StatefulWidget {
-  const LeftMenuWidget({super.key});
+  const LeftMenuWidget({super.key, required this.rebuildCallback});
+
+  final void Function() rebuildCallback;
 
   @override
   State<LeftMenuWidget> createState() => _LeftMenuWidgetState();
@@ -67,9 +69,12 @@ class _LeftMenuWidgetState extends State<LeftMenuWidget> {
                     lockParentWindow: true,
                     dialogTitle: 'Select File');
                 if (result != null) {
-                  print('Selected folder path: ${result.files.single.path}');
-                } else {
-                  print('Folder selection canceled');
+                  File file = File(result.files.single.path!);
+                  String str = file.readAsStringSync();
+                  GlobalVar.modelInfo = modelInfoFromJson(str);
+                  setState(() {
+                    widget.rebuildCallback();
+                  });
                 }
               },
               child: const Text('Load Diagram')),
