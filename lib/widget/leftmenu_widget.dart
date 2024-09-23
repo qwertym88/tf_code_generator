@@ -4,7 +4,9 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/component/global.dart';
 import 'package:flutter_application_1/component/layer_serialize.dart';
+import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/style/style.dart';
+import 'package:provider/provider.dart';
 
 class LeftMenuWidget extends StatefulWidget {
   const LeftMenuWidget({super.key, required this.rebuildCallback});
@@ -12,14 +14,23 @@ class LeftMenuWidget extends StatefulWidget {
   final void Function() rebuildCallback;
 
   @override
-  State<LeftMenuWidget> createState() => _LeftMenuWidgetState();
+  State<LeftMenuWidget> createState() => LeftMenuWidgetState();
 }
 
-class _LeftMenuWidgetState extends State<LeftMenuWidget> {
-  int? v;
+class LeftMenuWidgetState extends State<LeftMenuWidget> {
+  late ModelInfo model;
+  final List<String> validDatasetType = [
+    'MNIST',
+    'IMDB',
+    'Reuters',
+    'Fashion MNIST',
+    'CIFAR 10',
+    'CIFAR 100'
+  ];
 
   @override
   Widget build(BuildContext context) {
+    model = GlobalVar.modelInfo;
     return LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
       return Column(
@@ -41,20 +52,23 @@ class _LeftMenuWidgetState extends State<LeftMenuWidget> {
                 ),
                 // TODO: 奇丑无比的下拉按钮，感觉不太想用它
                 DropdownButton(
-                    value: v,
+                    value: model.dataset,
                     focusColor: Colors.white,
                     isDense: true,
                     icon: const Icon(Icons.arrow_drop_down),
                     iconSize: 40,
                     hint: const Text('请选择数据集'),
-                    items: const [
-                      DropdownMenuItem(value: 1, child: Text('mnist 手写数字集1')),
-                      DropdownMenuItem(value: 2, child: Text('mnist 手写数字集2')),
-                      DropdownMenuItem(value: 3, child: Text('mnist 手写数字集3'))
-                    ],
+                    items: validDatasetType.map((value) {
+                      return DropdownMenuItem(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
                     onChanged: (value) {
                       setState(() {
-                        v = value;
+                        model.dataset = value!;
+                        Provider.of<InputChanger>(context, listen: false)
+                            .updateText(value);
                       });
                     }),
               ],
@@ -72,6 +86,11 @@ class _LeftMenuWidgetState extends State<LeftMenuWidget> {
                   File file = File(result.files.single.path!);
                   String str = file.readAsStringSync();
                   GlobalVar.modelInfo = modelInfoFromJson(str);
+                  // TODO: 处理非法输入
+                  if (GlobalVar.modelInfo.layers.isEmpty ||
+                      GlobalVar.modelInfo.layers[0].type != 'Input') {
+                    return;
+                  }
                   setState(() {
                     widget.rebuildCallback();
                   });

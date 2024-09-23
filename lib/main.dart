@@ -6,6 +6,7 @@ import 'package:flutter_application_1/component/global.dart';
 import 'package:flutter_application_1/widget/code_widget.dart';
 import 'package:flutter_application_1/widget/leftmenu_widget.dart';
 import 'package:flutter_application_1/widget/rightmenu_widget.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,14 +18,16 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Helloworld Demo',
-      theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
-          visualDensity: VisualDensity.adaptivePlatformDensity),
-      home: const MyHomePage(title: 'Helloworld Demo Home Page'),
-    );
+    return ChangeNotifierProvider(
+        create: (context) => InputChanger(),
+        child: MaterialApp(
+          title: 'Helloworld Demo',
+          theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+              useMaterial3: true,
+              visualDensity: VisualDensity.adaptivePlatformDensity),
+          home: const MyHomePage(title: 'Helloworld Demo Home Page'),
+        ));
   }
 }
 
@@ -41,11 +44,15 @@ class _MyHomePageState extends State<MyHomePage> {
   // Widget code = const CodeWidget();
   // Widget rightmenu = const RightMenuWidget();
   final GlobalKey<CodeWidgetState> _codeWidgetKey = GlobalKey();
+  final GlobalKey<LeftMenuWidgetState> _leftWidgetKey = GlobalKey();
   final GlobalKey<RightMenuWidgetState> _rightWidgetKey = GlobalKey();
 
   void loadDiagram() {
     _codeWidgetKey.currentState?.buildByList(GlobalVar.modelInfo.layers);
+    _leftWidgetKey.currentState?.setState(() {});
     _rightWidgetKey.currentState?.rebuild();
+    Provider.of<InputChanger>(context, listen: false)
+        .updateText(GlobalVar.modelInfo.dataset);
   }
 
   @override
@@ -90,5 +97,17 @@ class _MyHomePageState extends State<MyHomePage> {
             }
           }),
     );
+  }
+}
+
+class InputChanger with ChangeNotifier {
+  // the same as GlobalVar.modelInfo.dataset's default value
+  String _dataset = 'MNIST';
+
+  String get dataset => _dataset;
+
+  void updateText(String dataset) {
+    _dataset = dataset;
+    notifyListeners(); // 通知所有监听者更新
   }
 }

@@ -11,21 +11,21 @@ String modelInfoToJson(ModelInfo data) => json.encode(data.toJson());
 // TODO: layer_serialize添加datasets  已添加待测试
 class ModelInfo {
   String framework;
+  String dataset;
+  List<LayerInfo> layers;
   double? lr;
   String? loss;
   String? optimizer;
-  String? dataset;
   int? epoch;
   int? batch;
-  List<LayerInfo> layers;
 
   ModelInfo({
     required this.framework,
     required this.layers,
+    required this.dataset,
     this.lr,
     this.loss,
     this.optimizer,
-    this.dataset,
     this.epoch,
     this.batch,
   });
@@ -57,24 +57,42 @@ class ModelInfo {
 class LayerInfo {
   String type;
   List<int>? dimensions;
+  int? vocabulary;
   int? filterNum;
-  List<int>? filterSize;
+  List<int>? kernelSize;
   int? stride;
   String? padding;
   String? activation;
-  String? pooling;
+  String? method; // 细分类别
+  // String? pooling;
+  // String? normalization;
+  // String? reshaping;
   int? nou;
+  int? axis;
+  double? dropout;
+  double? recurrentDropout;
+  int? inputDim;
+  int? outputDim;
 
   LayerInfo({
     required this.type,
     this.dimensions,
+    this.vocabulary,
     this.filterNum,
-    this.filterSize,
+    this.kernelSize,
     this.stride,
     this.padding,
     this.activation,
-    this.pooling,
+    this.method,
+    // this.pooling,
+    // this.normalization,
+    // this.reshaping,
     this.nou,
+    this.axis,
+    this.dropout,
+    this.recurrentDropout,
+    this.inputDim,
+    this.outputDim,
   });
 
   // 访问不存在的key时返回null
@@ -83,15 +101,24 @@ class LayerInfo {
         dimensions: json["dimensions"] == null
             ? null
             : List<int>.from(json["dimensions"]!.map((x) => x)),
+        vocabulary: json["vocabulary"],
         filterNum: json["filter_num"],
-        filterSize: json["filter_size"] == null
+        kernelSize: json["kernel_size"] == null
             ? null
-            : List<int>.from(json["filter_size"]!.map((x) => x)),
+            : List<int>.from(json["kernel_size"]!.map((x) => x)),
         stride: json["stride"],
         padding: json["padding"],
         activation: json["activation"],
-        pooling: json["pooling"],
+        method: json["method"],
+        // pooling: json["pooling"],
+        // normalization: json["normalization"],
+        // reshaping: json["reshaping"],
         nou: json["nou"],
+        axis: json["axis"],
+        dropout: json["dropout"],
+        recurrentDropout: json["recurrent_dropout"],
+        inputDim: json["input_dim"],
+        outputDim: json["output_dim"],
       );
 
   Map<String, dynamic> toJson() {
@@ -99,14 +126,23 @@ class LayerInfo {
       "type": type,
       "dimensions":
           dimensions == null ? null : List<int>.from(dimensions!.map((x) => x)),
+      "vocabulary": vocabulary,
       "filter_num": filterNum,
-      "filter_size":
-          filterSize == null ? null : List<int>.from(filterSize!.map((x) => x)),
+      "kernel_size":
+          kernelSize == null ? null : List<int>.from(kernelSize!.map((x) => x)),
       "stride": stride,
       "padding": padding,
       "activation": activation,
-      "pooling": pooling,
+      "method": method,
+      // "pooling": pooling,
+      // "normalization": normalization,
+      // "reshaping": reshaping,
       "nou": nou,
+      "axis": axis,
+      "dropout": dropout,
+      "recurrent_dropout": recurrentDropout,
+      "input_dim": inputDim,
+      "output_dim": outputDim,
     };
     // 专门去除空值，避免生成一堆"xxx":null
     map.removeWhere((key, value) => value == null);

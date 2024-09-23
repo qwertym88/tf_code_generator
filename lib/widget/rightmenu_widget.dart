@@ -16,7 +16,12 @@ class RightMenuWidget extends StatefulWidget {
 class RightMenuWidgetState extends State<RightMenuWidget> {
   late ModelInfo model;
 
-  final List<String> validLossType = ['MSE', 'CE'];
+  final List<String> validLossType = [
+    'MSE',
+    'CE',
+    'Categorical_Crossentropy',
+    'Binary_Crossentropy',
+  ];
 
   void rebuild() {
     setState(() {});
@@ -69,7 +74,7 @@ class OptimizerWidget extends StatefulWidget {
 }
 
 class _OptimizerWidgetState extends State<OptimizerWidget> {
-  final List<String> validOptType = ['SGD', 'Adam'];
+  final List<String> validOptType = ['SGD', 'RMSprop', 'Adam'];
 
   @override
   Widget build(BuildContext context) {

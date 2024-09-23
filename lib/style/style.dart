@@ -6,6 +6,8 @@ class AppStyle {
       TextStyle(fontSize: 20, color: Colors.redAccent);
   static const TextStyle layerContextTextStyle =
       TextStyle(fontSize: 18, color: Colors.redAccent);
+  static const TextStyle denserLayerContextTextStyle =
+      TextStyle(fontSize: 16, color: Colors.redAccent);
   static const TextStyle menuHeaderTextStyle =
       TextStyle(fontSize: 28, color: Colors.redAccent);
   static const TextStyle hintTextStyle =

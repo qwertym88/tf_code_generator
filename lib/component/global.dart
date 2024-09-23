@@ -1,14 +1,13 @@
 import 'package:flutter_application_1/component/layer_serialize.dart';
 
 class GlobalVar {
-  static ModelInfo modelInfo =
-      ModelInfo(framework: 'tensorflow', layers: <LayerInfo>[])
-        ..batch = 32
-        ..epoch = 20
-        ..loss = 'SGD'
-        ..lr = 0.001
-        ..optimizer = 'adam'
-        ..dataset = 'minst';
+  static ModelInfo modelInfo = ModelInfo(
+      framework: 'tensorflow', layers: <LayerInfo>[], dataset: 'MNIST')
+    ..batch = 32
+    ..epoch = 20
+    ..loss = 'SGD'
+    ..lr = 0.001
+    ..optimizer = 'Adam';
 
   // 按照index插入list，返回hash
   static int addLayer(int index, LayerInfo layer) {
@@ -33,31 +32,91 @@ class GlobalVar {
 // 生成python代码
 String generate(ModelInfo model) {
   //creating the string to write (code)
-  String code = '#import statements\n';
-  // if (model.framework == 'TensorFlow') {
-  code += 'import keras\n';
-  code += 'import tensorflow as tf\n';
-  code += 'from keras.layers import *\n';
-  code += 'from keras.callbacks import TensorBoard\n';
+  String code = '''#import statements
+import keras
+import numpy as np
+import tensorflow as tf
+from keras.layers import *
+from keras import optimizers
+from keras.callbacks import TensorBoard
+from datetime import datetime
 
-  code += 'from keras.datasets import ${model.dataset}\n';
-  code += 'from datetime import datetime\n\n';
+TIMESTAMP = '{0:%H-%M-%S %m-%d-%Y/}'.format(datetime.now())
+train_log_dir = 'logs/train/' + TIMESTAMP\n\n''';
 
-  code += 'TIMESTAMP = \'{0:%H-%M-%S %m-%d-%Y/}\'.format(datetime.now())\n';
-  code += 'train_log_dir = \'logs/train/\' + TIMESTAMP\n\n';
+  String? vocabulary = model.layers[0].vocabulary?.toString(); // 第一层必须是input
+  String inputShape =
+      model.layers[0].dimensions!.map((i) => i.toString()).join(', ');
 
-  code += '#specify x_train and y_train here:\n';
+  switch (model.dataset) {
+    case 'MNIST':
+      code += '''from keras.datasets import mnist
+from keras.utils import to_categorical
 
-  code += '(x_train,y_train),(x_test,y_test)=${model.dataset}.load_data()\n\n';
+#preprocessing:
+(x_train, y_train), (x_test, y_test) = mnist.load_data()
+
+x_train = x_train.reshape(x_train.shape[0], 28, 28, 1).astype('float32') / 255.0
+x_test = x_test.reshape(x_test.shape[0], 28, 28, 1).astype('float32') / 255.0
+y_train = to_categorical(y_train, num_classes=10)
+y_test = to_categorical(y_test, num_classes=10)\n''';
+      break;
+    case 'IMDB':
+      code += '''from keras.datasets import imdb
+from keras_preprocessing.sequence import pad_sequences
+
+#preprocessing:
+(x_train,y_train),(x_test,y_test) = imdb.load_data(num_words=$vocabulary)\n\n
+
+x_train = pad_sequences(x_train, maxlen=$inputShape)
+x_test = pad_sequences(x_test, maxlen=$inputShape)\n''';
+      break;
+    case 'Reuters':
+      code += '''from keras.datasets import reuters
+from keras_preprocessing.sequence import pad_sequences
+from keras.utils import to_categorical
+
+#preprocessing:
+(x_train,y_train),(x_test,y_test) = reuters.load_data(num_words=$vocabulary)
+
+x_train = pad_sequences(x_train, maxlen=$inputShape)
+x_test = pad_sequences(x_test, maxlen=$inputShape)
+num_classes = np.max(y_train) + 1 # num_classes=46
+y_train = to_categorical(y_train, num_classes)
+y_test = to_categorical(y_test, num_classes)\n''';
+      break;
+    case 'Fashion MNIST':
+      code += '''from keras.datasets import fashion_mnist
+from keras.utils import to_categorical
+
+#preprocessing:
+(x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
+
+x_train = x_train.reshape(x_train.shape[0], 28, 28, 1).astype('float32') / 255.0
+x_test = x_test.reshape(x_test.shape[0], 28, 28, 1).astype('float32') / 255.0
+y_train = to_categorical(y_train, num_classes=10)
+y_test = to_categorical(y_test, num_classes=10)\n''';
+      break;
+    case 'CIFAR 10':
+      code += '''from keras.datasets import cifar10
+from keras.utils import to_categorical
+
+#preprocessing:
+(x_train, y_train), (x_test, y_test) = cifar10.load_data()
+
+x_train = x_train.astype('float32') / 255.0
+x_test = x_test.astype('float32') / 255.0
+y_train = to_categorical(y_train, num_classes=10)
+y_test = to_categorical(y_test, num_classes=10)\n''';
+      break;
+    default:
+      break;
+  }
+
   code += '#creating the model\n';
   code += 'model = keras.Sequential()\n';
   code += '#adding layers\n';
-
-  String inputShape =
-      model.layers[0].dimensions!.map((i) => i.toString()).join(', ');
-  if (model.layers[0].type == 'Input') {
-    code += 'model.add(InputLayer(input_shape = ($inputShape)))\n';
-  }
+  code += 'model.add(InputLayer(input_shape = ($inputShape)))\n';
 
   for (LayerInfo layer in model.layers) {
     // let ret_seq = 'False';
@@ -68,24 +127,91 @@ String generate(ModelInfo model) {
             'model.add(Dense(${layer.nou!}, activation = \'${layer.activation!.toLowerCase()}\'))\n';
         break;
 
-      //convolution 2D case
-      case 'Conv2d':
+      //convolution case
+      case 'Convolution':
+        String d;
+        if (layer.kernelSize!.length == 1) {
+          d = '1D';
+        } else if (layer.kernelSize!.length == 2) {
+          d = '2D';
+        } else if (layer.kernelSize!.length == 3) {
+          d = '3D';
+        } else {
+          break;
+        }
         code +=
-            'model.add(Conv2D(${layer.nou!}, (${layer.filterSize![0]}, ${layer.filterSize![1]}), strides = ${layer.stride!}, activation = \'${layer.activation!.toLowerCase()}\', padding = \'${layer.padding}\'))\n';
+            'model.add(Conv$d(${layer.nou!}, (${layer.kernelSize!.join(', ')}), strides = ${layer.stride!}, activation = \'${layer.activation!.toLowerCase()}\', padding = \'${layer.padding!.toLowerCase()}\'))\n';
         break;
 
-      //pool 2D case
-      case 'Pool2d':
-        if (layer.pooling! == 'MaxPooling') {
+      //pooling case
+      case 'Pooling':
+        String d;
+        if (layer.kernelSize!.length == 1) {
+          d = '1D';
+        } else if (layer.kernelSize!.length == 2) {
+          d = '2D';
+        } else if (layer.kernelSize!.length == 3) {
+          d = '3D';
+        } else {
+          break;
+        }
+        if (layer.method! == 'MaxPooling') {
           code +=
-              'model.add(MaxPooling2D((${layer.filterSize![0]}, ${layer.filterSize![1]}), strides = ${layer.stride}))\n';
-        } else if (layer.pooling! == 'AvePooling') {
+              'model.add(MaxPooling$d((${layer.kernelSize!.join(', ')}), strides = ${layer.stride}))\n';
+        } else if (layer.method! == 'AvePooling') {
           code +=
-              'model.add(AvePooling((${layer.filterSize![0]}, ${layer.filterSize![1]}), strides = ${layer.stride}))\n';
+              'model.add(AveragePooling$d((${layer.kernelSize!.join(', ')}), strides = ${layer.stride}))\n';
+        } else if (layer.method! == 'GlobalMaxPooling') {
+          code += 'model.add(GlobalMaxPooling$d())\n';
         }
         break;
 
-      //output case
+      // LSTM case
+      case 'LSTM':
+        code +=
+            'model.add(LSTM(${layer.nou!}, dropout=${layer.dropout!}, recurrent_dropout=${layer.recurrentDropout!}))\n';
+        break;
+
+      // normalization case
+      case 'Normalization':
+        if (layer.method! == 'BatchNormalization') {
+          code += 'model.add(BatchNormalization(axis = ${layer.axis!}))\n';
+        } else if (layer.method! == 'LayerNormalization') {
+          code += 'model.add(LayerNormalization(axis = ${layer.axis!}))\n';
+        } else if (layer.method! == 'GroupNormalization') {
+          code += 'model.add(GroupNormalization(axis = ${layer.axis!}))\n';
+        }
+        break;
+
+      // reshaping case
+      case 'Reshaping':
+        if (layer.method! == 'Reshape') {
+          code += 'model.add(Reshape((${layer.dimensions!.join(', ')})))\n';
+        } else if (layer.method! == 'Flatten') {
+          code += 'model.add(Flatten())\n';
+        }
+        break;
+
+      // dropout case
+      case 'Dropout':
+        if (layer.method! == 'Dropout') {
+          code += 'model.add(Dropout(${layer.dropout!}))\n';
+        } else if (layer.method! == 'SpatialDropout' &&
+            layer.dimensions!.length <= 3) {
+          code +=
+              'model.add(SpatialDropout${layer.dimensions!.length}D(${layer.dropout!}))\n';
+        }
+        break;
+
+      // embedding case
+      case 'Embedding':
+        if (vocabulary != null) {
+          code +=
+              'model.add(Embedding(input_dim = ${layer.inputDim!}, output_dim = ${layer.outputDim!}))\n';
+        }
+        break;
+
+      // output case
       case 'Output':
         code +=
             'model.add(Dense(${layer.nou!}, activation = \'${layer.activation!.toLowerCase()}\'))\n';
@@ -96,22 +222,22 @@ String generate(ModelInfo model) {
 
       //         //convolution 1D case
       //         case 'Convolution 1D':
-      //             code += 'model.add(Conv1D(${layer.filter_num}, ${layer.filter_size}, strides = ${layer.stride}, activation = '${layer.activation.toLowerCase()}', padding = '${layer.padding}'))'
+      //             code += 'model.add(Conv1D(${layer.filter_num}, ${layer.kernel_size}, strides = ${layer.stride}, activation = '${layer.activation.toLowerCase()}', padding = '${layer.padding}'))'
       //             break;
 
       //         //convolution 3D case
       //         case 'Convolution 3D':
-      //             code += 'model.add(Conv3D(${layer.filter_num}, (${layer.filter_size[0]}, ${layer.filter_size[1]}, ${layer.filter_size[2]}), strides = ${layer.stride}, activation = '${layer.activation.toLowerCase()}', padding = '${layer.padding}'))'
+      //             code += 'model.add(Conv3D(${layer.filter_num}, (${layer.kernel_size[0]}, ${layer.kernel_size[1]}, ${layer.kernel_size[2]}), strides = ${layer.stride}, activation = '${layer.activation.toLowerCase()}', padding = '${layer.padding}'))'
       //             break;
 
       //         //max pool 1D case
       //         case 'Max Pool 1D':
-      //             code += 'model.add(MaxPooling1D(${layer.filter_size}, strides = ${layer.stride}))'
+      //             code += 'model.add(MaxPooling1D(${layer.kernel_size}, strides = ${layer.stride}))'
       //             break;
 
       //         //max pool 3D case
       //         case 'Max Pool 3D':
-      //             code += 'model.add(MaxPooling3D((${layer.filter_size[0]}, ${layer.filter_size[1]}, ${layer.filter_size[2]}), strides = ${layer.stride}))'
+      //             code += 'model.add(MaxPooling3D((${layer.kernel_size[0]}, ${layer.kernel_size[1]}, ${layer.kernel_size[2]}), strides = ${layer.stride}))'
       //             break;
 
       //         //max pool 3D case
@@ -126,17 +252,17 @@ String generate(ModelInfo model) {
 
       //         //avg pool 1D case
       //         case 'Avg Pool 1D':
-      //             code += 'model.add(AveragePooling1D(${layer.filter_size}, strides = ${layer.stride}))';
+      //             code += 'model.add(AveragePooling1D(${layer.kernel_size}, strides = ${layer.stride}))';
       //             break;
 
       //         //avg pool 2D case
       //         case 'Avg Pool 2D':
-      //             code += 'model.add(AveragePooling2D((${layer.filter_size[0]}, ${layer.filter_size[1]}), strides = ${layer.stride}))';
+      //             code += 'model.add(AveragePooling2D((${layer.kernel_size[0]}, ${layer.kernel_size[1]}), strides = ${layer.stride}))';
       //             break;
 
       //         //avg pool 3D case
       //         case 'Avg Pool 3D':
-      //             code += 'model.add(AveragePooling3D((${layer.filter_size[0]}, ${layer.filter_size[1]}, ${layer.filter_size[2]}), strides = ${layer.stride}))';
+      //             code += 'model.add(AveragePooling3D((${layer.kernel_size[0]}, ${layer.kernel_size[1]}, ${layer.kernel_size[2]}), strides = ${layer.stride}))';
       //             break;
 
       //         //batch normalization case
@@ -181,12 +307,12 @@ String generate(ModelInfo model) {
 
   code += '#compiling the model\n';
   code +=
-      'model.compile(optimizer = tf.keras.optimizers.${model.optimizer}(learning_rate = ${model.lr}), loss = \'${model.loss}\', metrics=[\'acc\'])\n\n';
+      'model.compile(optimizer = optimizers.${model.optimizer!}(learning_rate = ${model.lr}), loss = \'${model.loss!.toLowerCase()}\', metrics=[\'acc\'])\n\n';
 
   code += '#training the model\n';
-  code += 'tbCallBack = TensorBoard(log_dir=train_log_dir)\n';
+  code += 'tbCallBack = TensorBoard(log_dir = train_log_dir)\n';
   code +=
-      'history = model.fit(x= x_train, y= y_train, batch_size = ${model.batch}, epochs = ${model.epoch},callbacks=[tbCallBack])\n\n\n';
+      'history = model.fit(x = x_train, y = y_train, batch_size = ${model.batch}, epochs = ${model.epoch},callbacks = [tbCallBack])\n\n\n';
 
   code += '#testing the model\n';
   code += 'print("\\n\\nevaluating model performance...\\n")\n';

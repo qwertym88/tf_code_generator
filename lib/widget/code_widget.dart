@@ -7,23 +7,48 @@ import 'package:flutter_application_1/component/layer_serialize.dart';
 LayerInfo initLayerInfo(String type) {
   switch (type) {
     case 'Input':
-      return LayerInfo(type: type)..dimensions = [1, 28, 28];
+      return LayerInfo(type: type)
+        ..dimensions = [1, 28, 28]
+        ..vocabulary = 20000;
     case 'Dense':
       return LayerInfo(type: type)
-        ..activation = 'Relu'
+        ..activation = 'Linear'
         ..nou = 10;
-    case 'Conv2d':
+    case 'Convolution':
       return LayerInfo(type: type)
-        ..activation = 'Relu'
+        ..activation = 'Linear'
         ..nou = 32
         ..stride = 1
-        ..filterSize = [3, 3]
-        ..padding = 'valid';
-    case 'Pool2d':
+        ..kernelSize = [3, 3]
+        ..padding = 'Valid';
+    case 'Pooling':
       return LayerInfo(type: type)
         ..stride = 1
-        ..filterSize = [3, 3]
-        ..pooling = 'MaxPooling';
+        ..kernelSize = [3, 3]
+        ..method = 'MaxPooling';
+    case 'LSTM':
+      return LayerInfo(type: type)
+        ..nou = 10
+        ..dropout = 0.2
+        ..recurrentDropout = 0.2
+        ..activation = 'Tanh';
+    case 'Normalization':
+      return LayerInfo(type: type)
+        ..axis = -1
+        ..method = 'BatchNormalization';
+    case 'Reshaping':
+      return LayerInfo(type: type)
+        ..dimensions = [1, 28, 28]
+        ..method = 'Reshape';
+    case 'Dropout':
+      return LayerInfo(type: type)
+        ..dropout = 0.25
+        ..method = 'Dropout'
+        ..dimensions = [1];
+    case 'Embedding':
+      return LayerInfo(type: type)
+        ..inputDim = 400
+        ..outputDim = 50;
     case 'Output':
       return LayerInfo(type: type)
         ..activation = 'Sigmoid'
@@ -58,25 +83,65 @@ class CodeWidget extends StatefulWidget {
 class CodeWidgetState extends State<CodeWidget> {
   List<BaseLayerWidget> contacts = [];
 
-  final List<String> validLayerType = ['Dense', 'Output', 'Conv2d', 'Pool2d'];
+  final List<String> validLayerType = [
+    'Dense',
+    'Convolution',
+    'Pooling',
+    'LSTM',
+    'Normalization',
+    'Reshaping',
+    'Dropout',
+    'Embedding',
+    'Output',
+  ];
 
-  // 闭包保留index
-  void addNewLayer(int index, LayerInfo info) {
-    int hash = GlobalVar.addLayer(index, info);
+  BaseLayerWidget fromType(String type, int hash) {
     BaseLayerWidget widget;
-    switch (info.type) {
+    switch (type) {
+      case 'Input':
+        widget = InputLayerWidget(hash: hash);
       case 'Dense':
         widget = DenseLayerWidget(
           hash: hash,
           deleteCallback: () => deleteLayer(hash),
         );
-      case 'Conv2d':
-        widget = Conv2dLayerWidget(
+      case 'Convolution':
+        widget = ConvolutionLayerWidget(
           hash: hash,
           deleteCallback: () => deleteLayer(hash),
         );
-      case 'Pool2d':
-        widget = Pool2dLayerWidget(
+      case 'Pooling':
+        widget = PoolingLayerWidget(
+          hash: hash,
+          deleteCallback: () => deleteLayer(hash),
+        );
+        break;
+      case 'LSTM':
+        widget = LSTMLayerWidget(
+          hash: hash,
+          deleteCallback: () => deleteLayer(hash),
+        );
+        break;
+      case 'Normalization':
+        widget = NormalizationLayerWidget(
+          hash: hash,
+          deleteCallback: () => deleteLayer(hash),
+        );
+        break;
+      case 'Reshaping':
+        widget = ReshapeLayerWidget(
+          hash: hash,
+          deleteCallback: () => deleteLayer(hash),
+        );
+        break;
+      case 'Dropout':
+        widget = DropoutLayerWidget(
+          hash: hash,
+          deleteCallback: () => deleteLayer(hash),
+        );
+        break;
+      case 'Embedding':
+        widget = EmbeddingLayerWidget(
           hash: hash,
           deleteCallback: () => deleteLayer(hash),
         );
@@ -86,12 +151,21 @@ class CodeWidgetState extends State<CodeWidget> {
           hash: hash,
           deleteCallback: () => deleteLayer(hash),
         );
+        break;
       default:
         widget = DenseLayerWidget(
           hash: hash,
           deleteCallback: () => deleteLayer(hash),
         );
+        break;
     }
+    return widget;
+  }
+
+  // 闭包保留index
+  void addNewLayer(int index, LayerInfo info) {
+    int hash = GlobalVar.addLayer(index, info);
+    BaseLayerWidget widget = fromType(info.type, hash);
     setState(() {
       contacts.insert(index, widget);
       Navigator.of(context).pop();
@@ -111,35 +185,7 @@ class CodeWidgetState extends State<CodeWidget> {
     setState(() {
       for (LayerInfo info in layers) {
         int hash = info.hashCode;
-        BaseLayerWidget widget;
-        switch (info.type) {
-          case 'Dense':
-            widget = DenseLayerWidget(
-              hash: hash,
-              deleteCallback: () => deleteLayer(hash),
-            );
-          case 'Conv2d':
-            widget = Conv2dLayerWidget(
-              hash: hash,
-              deleteCallback: () => deleteLayer(hash),
-            );
-          case 'Pool2d':
-            widget = Pool2dLayerWidget(
-              hash: hash,
-              deleteCallback: () => deleteLayer(hash),
-            );
-            break;
-          case 'Output':
-            widget = OutputLayerWidget(
-              hash: hash,
-              deleteCallback: () => deleteLayer(hash),
-            );
-          default:
-            widget = DenseLayerWidget(
-              hash: hash,
-              deleteCallback: () => deleteLayer(hash),
-            );
-        }
+        BaseLayerWidget widget = fromType(info.type, hash);
         contacts.add(widget);
       }
     });
@@ -148,8 +194,7 @@ class CodeWidgetState extends State<CodeWidget> {
   @override
   void initState() {
     super.initState();
-    int hash =
-        GlobalVar.addLayer(0, LayerInfo(type: 'Input')..dimensions = [28]);
+    int hash = GlobalVar.addLayer(0, initLayerInfo('Input'));
     contacts.add(InputLayerWidget(
       hash: hash,
     ));
