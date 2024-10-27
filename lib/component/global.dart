@@ -31,7 +31,6 @@ class GlobalVar {
 
 // 生成python代码
 String generate(ModelInfo model) {
-  //creating the string to write (code)
   String code = '''#import statements
 import keras
 import numpy as np
@@ -119,7 +118,6 @@ y_test = to_categorical(y_test, num_classes=10)\n''';
   code += 'model.add(InputLayer(input_shape = ($inputShape)))\n';
 
   for (LayerInfo layer in model.layers) {
-    // let ret_seq = 'False';
     switch (layer.type) {
       //linear case
       case 'Dense':
@@ -219,88 +217,6 @@ y_test = to_categorical(y_test, num_classes=10)\n''';
 
       default:
         break;
-
-      //         //convolution 1D case
-      //         case 'Convolution 1D':
-      //             code += 'model.add(Conv1D(${layer.filter_num}, ${layer.kernel_size}, strides = ${layer.stride}, activation = '${layer.activation.toLowerCase()}', padding = '${layer.padding}'))'
-      //             break;
-
-      //         //convolution 3D case
-      //         case 'Convolution 3D':
-      //             code += 'model.add(Conv3D(${layer.filter_num}, (${layer.kernel_size[0]}, ${layer.kernel_size[1]}, ${layer.kernel_size[2]}), strides = ${layer.stride}, activation = '${layer.activation.toLowerCase()}', padding = '${layer.padding}'))'
-      //             break;
-
-      //         //max pool 1D case
-      //         case 'Max Pool 1D':
-      //             code += 'model.add(MaxPooling1D(${layer.kernel_size}, strides = ${layer.stride}))'
-      //             break;
-
-      //         //max pool 3D case
-      //         case 'Max Pool 3D':
-      //             code += 'model.add(MaxPooling3D((${layer.kernel_size[0]}, ${layer.kernel_size[1]}, ${layer.kernel_size[2]}), strides = ${layer.stride}))'
-      //             break;
-
-      //         //max pool 3D case
-      //         case 'Activation':
-      //             if (['ELU', 'LeakyReLU', 'PReLU', 'ReLU', 'Softmax', 'ThresholdedReLU'].indexOf(layer.type) >= 0) {
-      //                 code += 'model.add(${layer.type}())';
-      //             }
-      //             else {
-      //                 code += 'model.add(Activation(activations.${layer.type}))'
-      //             }
-      //             break;
-
-      //         //avg pool 1D case
-      //         case 'Avg Pool 1D':
-      //             code += 'model.add(AveragePooling1D(${layer.kernel_size}, strides = ${layer.stride}))';
-      //             break;
-
-      //         //avg pool 2D case
-      //         case 'Avg Pool 2D':
-      //             code += 'model.add(AveragePooling2D((${layer.kernel_size[0]}, ${layer.kernel_size[1]}), strides = ${layer.stride}))';
-      //             break;
-
-      //         //avg pool 3D case
-      //         case 'Avg Pool 3D':
-      //             code += 'model.add(AveragePooling3D((${layer.kernel_size[0]}, ${layer.kernel_size[1]}, ${layer.kernel_size[2]}), strides = ${layer.stride}))';
-      //             break;
-
-      //         //batch normalization case
-      //         case 'Batch Normalization':
-      //             code += 'model.add(BatchNormalization())';
-      //             break;
-
-      //         //dropout case
-      //         case 'Dropout':
-      //             code += 'model.add(Dropout(rate = ${layer.prob}))';
-      //             break;
-
-      //         //embedding case
-      //         case 'Embedding':
-      //             code += 'model.add(Embedding(input_dim = ${layer.input_dim}, output_dim = ${layer.output_dim}, input_length = ${layer.input_length}))';
-      //             break;
-
-      //         //flatten case
-      //         case 'Flatten':
-      //             code += 'model.add(Flatten())';
-      //             break;
-
-      //         //LSTM and GRU case
-      //         case 'GRU':
-      //         case 'LSTM':
-      //             if (layer.ret_seq) {
-      //                 ret_seq = 'True';
-      //             }
-      //             code += 'model.add(${layer.name}(units = ${layer.units}, activations = '${layer.activation}', recurrent_activation = '${layer.re_activation}', return_sequences = ${ret_seq}))';
-      //             break;
-
-      //         //RNN case
-      //         case 'RNN':
-      //             if (layer.ret_seq) {
-      //                 ret_seq = 'True';
-      //             }
-      //             code += 'model.add(SimpleRNN(units = ${layer.units}, activations = '${layer.activation}', return_sequences = ${ret_seq}))';
-      //             break;
     }
   }
   code += '\nmodel.summary()\n\n';

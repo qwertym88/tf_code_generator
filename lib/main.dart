@@ -41,13 +41,12 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int cnt = 0;
 
-  // Widget code = const CodeWidget();
-  // Widget rightmenu = const RightMenuWidget();
   final GlobalKey<CodeWidgetState> _codeWidgetKey = GlobalKey();
   final GlobalKey<LeftMenuWidgetState> _leftWidgetKey = GlobalKey();
   final GlobalKey<RightMenuWidgetState> _rightWidgetKey = GlobalKey();
 
   void loadDiagram() {
+    // 所有页面都要重构
     _codeWidgetKey.currentState?.buildByList(GlobalVar.modelInfo.layers);
     _leftWidgetKey.currentState?.setState(() {});
     _rightWidgetKey.currentState?.rebuild();
@@ -61,9 +60,9 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(title: const Text('hello')),
       body: LayoutBuilder(
         builder: (context, constraints) {
+          // 折叠效果
           if (constraints.maxWidth > 980.0) {
             return Row(children: <Widget>[
-              // TODO: 研究下到底怎么分配页面好看
               SizedBox(
                 width: 335,
                 child: LeftMenuWidget(rebuildCallback: loadDiagram),
@@ -79,7 +78,6 @@ class _MyHomePageState extends State<MyHomePage> {
           }
         },
       ),
-      // TODO: 非常想弄个可展开的fab，然后将功能全部放进去
       floatingActionButton: IconButton(
           icon: const Icon(Icons.arrow_right),
           iconSize: 64,
@@ -103,7 +101,6 @@ class _MyHomePageState extends State<MyHomePage> {
 class InputChanger with ChangeNotifier {
   // the same as GlobalVar.modelInfo.dataset's default value
   String _dataset = 'MNIST';
-
   String get dataset => _dataset;
 
   void updateText(String dataset) {

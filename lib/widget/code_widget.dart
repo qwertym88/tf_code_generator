@@ -3,12 +3,11 @@ import 'package:flutter_application_1/component/common_layer.dart';
 import 'package:flutter_application_1/component/global.dart';
 import 'package:flutter_application_1/component/layer_serialize.dart';
 
-// LayerWidget的initState方法有一个神奇的问题，只能把初始化放在这里
 LayerInfo initLayerInfo(String type) {
   switch (type) {
     case 'Input':
       return LayerInfo(type: type)
-        ..dimensions = [1, 28, 28]
+        ..dimensions = [28, 28, 1]
         ..vocabulary = 20000;
     case 'Dense':
       return LayerInfo(type: type)
@@ -24,7 +23,7 @@ LayerInfo initLayerInfo(String type) {
     case 'Pooling':
       return LayerInfo(type: type)
         ..stride = 1
-        ..kernelSize = [3, 3]
+        ..kernelSize = [2, 2]
         ..method = 'MaxPooling';
     case 'LSTM':
       return LayerInfo(type: type)
@@ -38,7 +37,7 @@ LayerInfo initLayerInfo(String type) {
         ..method = 'BatchNormalization';
     case 'Reshaping':
       return LayerInfo(type: type)
-        ..dimensions = [1, 28, 28]
+        ..dimensions = [28, 28, 1]
         ..method = 'Reshape';
     case 'Dropout':
       return LayerInfo(type: type)
@@ -58,21 +57,7 @@ LayerInfo initLayerInfo(String type) {
   }
 }
 
-// 暂时写了不知道用在哪的代码
-// ListView.builder(
-// itemCount: validLayerType.length,
-// itemBuilder: (context, index) {
-//   return ListTile(
-//     leading: const Icon(Icons.abc),
-//     title: Text(validLayerType[index]),
-//     subtitle: const Text('123'),
-//     selected: selected == index,
-//     onTap: () => {selected = index},
-//   );
-// }),
-
 /// 中间的组件，图形化编程的主界面
-///
 class CodeWidget extends StatefulWidget {
   const CodeWidget({super.key});
 
@@ -81,7 +66,7 @@ class CodeWidget extends StatefulWidget {
 }
 
 class CodeWidgetState extends State<CodeWidget> {
-  List<BaseLayerWidget> contacts = [];
+  List<BaseLayerWidget> layerWidgets = [];
 
   final List<String> validLayerType = [
     'Dense',
@@ -167,26 +152,26 @@ class CodeWidgetState extends State<CodeWidget> {
     int hash = GlobalVar.addLayer(index, info);
     BaseLayerWidget widget = fromType(info.type, hash);
     setState(() {
-      contacts.insert(index, widget);
+      layerWidgets.insert(index, widget);
       Navigator.of(context).pop();
     });
   }
 
   void deleteLayer(int hash) {
     setState(() {
-      contacts.removeWhere((element) => element.hash == hash);
+      layerWidgets.removeWhere((element) => element.hash == hash);
       GlobalVar.removeLayer(hash);
     });
   }
 
   // load diagram后更新code widget显示效果
   void buildByList(List<LayerInfo> layers) {
-    contacts.clear();
+    layerWidgets.clear();
     setState(() {
       for (LayerInfo info in layers) {
         int hash = info.hashCode;
         BaseLayerWidget widget = fromType(info.type, hash);
-        contacts.add(widget);
+        layerWidgets.add(widget);
       }
     });
   }
@@ -195,7 +180,7 @@ class CodeWidgetState extends State<CodeWidget> {
   void initState() {
     super.initState();
     int hash = GlobalVar.addLayer(0, initLayerInfo('Input'));
-    contacts.add(InputLayerWidget(
+    layerWidgets.add(InputLayerWidget(
       hash: hash,
     ));
   }
@@ -203,11 +188,11 @@ class CodeWidgetState extends State<CodeWidget> {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: contacts.length,
+      itemCount: layerWidgets.length,
       itemBuilder: (context, index) {
         return Column(
           children: [
-            contacts[index],
+            layerWidgets[index],
             IconButton(
               icon: const Icon(Icons.add),
               onPressed: () async {
@@ -237,7 +222,6 @@ class CodeWidgetState extends State<CodeWidget> {
                                     );
                                   }).toList(),
                                   initialSelection: validLayerType[0],
-                                  // TODO: value=null时有bug，会吗？
                                   onSelected: (value) => selected = value!,
                                 ),
                               ],

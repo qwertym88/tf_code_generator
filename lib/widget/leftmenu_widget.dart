@@ -50,7 +50,6 @@ class LeftMenuWidgetState extends State<LeftMenuWidget> {
                 const SizedBox(
                   height: 40,
                 ),
-                // TODO: 奇丑无比的下拉按钮，感觉不太想用它
                 DropdownButton(
                     value: model.dataset,
                     focusColor: Colors.white,
@@ -79,7 +78,7 @@ class LeftMenuWidgetState extends State<LeftMenuWidget> {
               onPressed: () async {
                 FilePickerResult? result = await FilePicker.platform.pickFiles(
                     type: FileType.custom,
-                    allowedExtensions: ['pdf', 'txt'],
+                    allowedExtensions: ['json'],
                     lockParentWindow: true,
                     dialogTitle: 'Select File');
                 if (result != null) {
@@ -103,9 +102,9 @@ class LeftMenuWidgetState extends State<LeftMenuWidget> {
               onPressed: () async {
                 String? outputPath = await FilePicker.platform.saveFile(
                     type: FileType.custom,
-                    allowedExtensions: ['txt'],
+                    allowedExtensions: ['json'],
                     lockParentWindow: true,
-                    fileName: 'diagram1.txt',
+                    fileName: 'diagram1.json',
                     dialogTitle: 'Save Diagram');
                 if (outputPath != null) {
                   File file = await File(outputPath).create();

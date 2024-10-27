@@ -64,9 +64,6 @@ class LayerInfo {
   String? padding;
   String? activation;
   String? method; // 细分类别
-  // String? pooling;
-  // String? normalization;
-  // String? reshaping;
   int? nou;
   int? axis;
   double? dropout;
@@ -84,9 +81,6 @@ class LayerInfo {
     this.padding,
     this.activation,
     this.method,
-    // this.pooling,
-    // this.normalization,
-    // this.reshaping,
     this.nou,
     this.axis,
     this.dropout,
@@ -110,9 +104,6 @@ class LayerInfo {
         padding: json["padding"],
         activation: json["activation"],
         method: json["method"],
-        // pooling: json["pooling"],
-        // normalization: json["normalization"],
-        // reshaping: json["reshaping"],
         nou: json["nou"],
         axis: json["axis"],
         dropout: json["dropout"],

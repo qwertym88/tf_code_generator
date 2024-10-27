@@ -157,7 +157,7 @@ abstract class BaseLayerWidget extends StatefulWidget {
 class InputLayerWidget extends BaseLayerWidget {
   const InputLayerWidget({super.key, required super.hash});
 
-  final String type = 'Input';
+  final String label = 'Input';
 
   @override
   State<InputLayerWidget> createState() => _InputLayerWidgetState();
@@ -190,7 +190,7 @@ class _InputLayerWidgetState extends State<InputLayerWidget> {
         child: Column(children: [
           // 特殊的LayerLabel，少一个删除按钮
           Text(
-            widget.type,
+            widget.label,
             style: AppStyle.layerLabelTextStyle,
           ),
           // 具体内容
@@ -246,7 +246,7 @@ class DenseLayerWidget extends BaseLayerWidget {
 
   // 实现'按下按钮后删除自己'的行为
   final void Function() deleteCallback;
-  final String type = 'Dense';
+  final String label = 'Dense';
 
   @override
   State<DenseLayerWidget> createState() => _DenseLayerWidgetState();
@@ -332,7 +332,7 @@ class _DenseLayerWidgetState extends State<DenseLayerWidget> {
       height: 120,
       child: Center(
         child: Column(children: [
-          buildLayerLabel(widget.type, modifyCallback, widget.deleteCallback),
+          buildLayerLabel(widget.label, modifyCallback, widget.deleteCallback),
           // 具体内容
           Text(
             'Number of Units: ${layerInfo.nou}',
@@ -355,7 +355,7 @@ class OutputLayerWidget extends BaseLayerWidget {
       {super.key, required super.hash, required this.deleteCallback});
 
   final void Function() deleteCallback;
-  final String type = 'Output';
+  final String label = 'Output';
 
   @override
   State<OutputLayerWidget> createState() => _OutputLayerWidgetState();
@@ -431,7 +431,7 @@ class _OutputLayerWidgetState extends State<OutputLayerWidget> {
       height: 100,
       child: Center(
         child: Column(children: [
-          buildLayerLabel(widget.type, modifyCallback, widget.deleteCallback),
+          buildLayerLabel(widget.label, modifyCallback, widget.deleteCallback),
           // 具体内容
           Text(
             'Number of Units: ${layerInfo.nou}',
@@ -454,7 +454,7 @@ class ConvolutionLayerWidget extends BaseLayerWidget {
 
   // 实现'按下按钮后删除自己'的行为
   final void Function() deleteCallback;
-  final String type = 'Convolution';
+  final String label = 'Convolution';
 
   @override
   State<ConvolutionLayerWidget> createState() => _ConvolutionLayerWidgetState();
@@ -559,7 +559,7 @@ class _ConvolutionLayerWidgetState extends State<ConvolutionLayerWidget> {
       height: 180,
       child: Center(
         child: Column(children: [
-          buildLayerLabel(widget.type, modifyCallback, widget.deleteCallback),
+          buildLayerLabel(widget.label, modifyCallback, widget.deleteCallback),
           // 具体内容
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -613,7 +613,7 @@ class PoolingLayerWidget extends BaseLayerWidget {
 
   // 实现'按下按钮后删除自己'的行为
   final void Function() deleteCallback;
-  final String type = 'Pooling';
+  final String label = 'Pooling';
 
   @override
   State<PoolingLayerWidget> createState() => _PoolingLayerWidgetState();
@@ -694,7 +694,7 @@ class _PoolingLayerWidgetState extends State<PoolingLayerWidget> {
       height: layerInfo.method == 'GlobalMaxPooling' ? 110 : 130,
       child: Center(
         child: Column(children: [
-          buildLayerLabel(widget.type, modifyCallback, widget.deleteCallback),
+          buildLayerLabel(widget.label, modifyCallback, widget.deleteCallback),
           // 具体内容
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -742,7 +742,7 @@ class LSTMLayerWidget extends BaseLayerWidget {
 
   // 实现'按下按钮后删除自己'的行为
   final void Function() deleteCallback;
-  final String type = 'LSTM';
+  final String label = 'LSTM';
 
   @override
   State<LSTMLayerWidget> createState() => _LSTMLayerWidgetState();
@@ -845,7 +845,7 @@ class _LSTMLayerWidgetState extends State<LSTMLayerWidget> {
       height: 140,
       child: Center(
         child: Column(children: [
-          buildLayerLabel(widget.type, modifyCallback, widget.deleteCallback),
+          buildLayerLabel(widget.label, modifyCallback, widget.deleteCallback),
           // 具体内容
           Text(
             'Units: ${layerInfo.nou}',
@@ -878,7 +878,7 @@ class NormalizationLayerWidget extends BaseLayerWidget {
 
   // 实现'按下按钮后删除自己'的行为
   final void Function() deleteCallback;
-  final String type = 'Normalization';
+  final String label = 'Normalization';
 
   @override
   State<NormalizationLayerWidget> createState() =>
@@ -959,7 +959,7 @@ class _NormalizationLayerWidgetState extends State<NormalizationLayerWidget> {
       height: 100,
       child: Center(
         child: Column(children: [
-          buildLayerLabel(widget.type, modifyCallback, widget.deleteCallback),
+          buildLayerLabel(widget.label, modifyCallback, widget.deleteCallback),
           // 具体内容
           Text(
             'Axis: ${layerInfo.axis}',
@@ -982,7 +982,7 @@ class ReshapeLayerWidget extends BaseLayerWidget {
 
   // 实现'按下按钮后删除自己'的行为
   final void Function() deleteCallback;
-  final String type = 'Reshaping';
+  final String label = 'Reshaping';
 
   @override
   State<ReshapeLayerWidget> createState() => _ReshapeLayerWidgetState();
@@ -1044,7 +1044,7 @@ class _ReshapeLayerWidgetState extends State<ReshapeLayerWidget> {
       height: layerInfo.method == 'Reshape' ? 110 : 70,
       child: Center(
         child: Column(children: [
-          buildLayerLabel(widget.type, modifyCallback, widget.deleteCallback),
+          buildLayerLabel(widget.label, modifyCallback, widget.deleteCallback),
           // 具体内容
           Text(
             'Method: ${layerInfo.method}',
@@ -1088,7 +1088,7 @@ class DropoutLayerWidget extends BaseLayerWidget {
 
   // 实现'按下按钮后删除自己'的行为
   final void Function() deleteCallback;
-  final String type = 'Dropout';
+  final String label = 'Dropout';
 
   @override
   State<DropoutLayerWidget> createState() => _DropoutLayerWidgetState();
@@ -1170,7 +1170,7 @@ class _DropoutLayerWidgetState extends State<DropoutLayerWidget> {
       height: layerInfo.method == 'SpatialDropout' ? 140 : 100,
       child: Center(
         child: Column(children: [
-          buildLayerLabel(widget.type, modifyCallback, widget.deleteCallback),
+          buildLayerLabel(widget.label, modifyCallback, widget.deleteCallback),
           // 具体内容
           layerInfo.method == 'SpatialDropout'
               ? Row(
@@ -1218,7 +1218,7 @@ class EmbeddingLayerWidget extends BaseLayerWidget {
 
   // 实现'按下按钮后删除自己'的行为
   final void Function() deleteCallback;
-  final String type = 'Embedding';
+  final String label = 'Embedding';
 
   @override
   State<EmbeddingLayerWidget> createState() => _EmbeddingLayerWidgetState();
@@ -1290,7 +1290,7 @@ class _EmbeddingLayerWidgetState extends State<EmbeddingLayerWidget> {
       height: 100,
       child: Center(
         child: Column(children: [
-          buildLayerLabel(widget.type, modifyCallback, widget.deleteCallback),
+          buildLayerLabel(widget.label, modifyCallback, widget.deleteCallback),
           // 具体内容
           Text(
             'Input Size: ${layerInfo.inputDim}',
