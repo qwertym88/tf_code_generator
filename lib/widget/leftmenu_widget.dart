@@ -2,10 +2,10 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/component/global.dart';
-import 'package:flutter_application_1/component/layer_serialize.dart';
-import 'package:flutter_application_1/main.dart';
-import 'package:flutter_application_1/style/style.dart';
+import 'package:tf_code_generator/component/global.dart';
+import 'package:tf_code_generator/component/layer_serialize.dart';
+import 'package:tf_code_generator/main.dart';
+import 'package:tf_code_generator/style/style.dart';
 import 'package:provider/provider.dart';
 
 class LeftMenuWidget extends StatefulWidget {
@@ -85,7 +85,7 @@ class LeftMenuWidgetState extends State<LeftMenuWidget> {
                   File file = File(result.files.single.path!);
                   String str = file.readAsStringSync();
                   GlobalVar.modelInfo = modelInfoFromJson(str);
-                  // TODO: 处理非法输入
+                  // TODO: 处理非法输入，目前还不太全面
                   if (GlobalVar.modelInfo.layers.isEmpty ||
                       GlobalVar.modelInfo.layers[0].type != 'Input') {
                     return;

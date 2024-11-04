@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/component/common_layer.dart';
-import 'package:flutter_application_1/component/global.dart';
-import 'package:flutter_application_1/component/layer_serialize.dart';
+import 'package:tf_code_generator/component/common_layer.dart';
+import 'package:tf_code_generator/component/global.dart';
+import 'package:tf_code_generator/component/layer_serialize.dart';
 
 LayerInfo initLayerInfo(String type) {
   switch (type) {

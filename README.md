@@ -1,4 +1,4 @@
-# flutter_application_1
+# tf_code_generator
 
 A new Flutter project.
 

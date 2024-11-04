@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 
 class AppStyle {
-  static const Color primaryColor = Colors.blueAccent;
-  static const TextStyle layerLabelTextStyle =
-      TextStyle(fontSize: 20, color: Colors.redAccent);
+  static const Color primaryColor = Color(0xff303841);
+  static const TextStyle layerLabelTextStyle = TextStyle(
+      fontSize: 24, color: Color(0xffff5722), fontWeight: FontWeight.w900);
+  static const TextStyle menuHeaderTextStyle = TextStyle(
+      fontSize: 28, color: Color(0xffff5722), fontWeight: FontWeight.w900);
+  static const TextStyle dialogTitleTextStyle =
+      TextStyle(fontSize: 28, fontWeight: FontWeight.bold);
   static const TextStyle layerContextTextStyle =
-      TextStyle(fontSize: 18, color: Colors.redAccent);
+      TextStyle(fontSize: 18, color: Color(0xffff5722), fontFamily: 'Arturito');
   static const TextStyle denserLayerContextTextStyle =
-      TextStyle(fontSize: 16, color: Colors.redAccent);
-  static const TextStyle menuHeaderTextStyle =
-      TextStyle(fontSize: 28, color: Colors.redAccent);
+      TextStyle(fontSize: 16, color: Color(0xffff5722), fontFamily: 'Arturito');
   static const TextStyle hintTextStyle =
-      TextStyle(fontSize: 18, color: Colors.purpleAccent);
+      TextStyle(fontSize: 18, color: Color(0xff00adb5), fontFamily: 'Arturito');
 }

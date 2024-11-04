@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_application_1/component/global.dart';
-import 'package:flutter_application_1/component/layer_serialize.dart';
-import 'package:flutter_application_1/style/style.dart';
+import 'package:tf_code_generator/component/global.dart';
+import 'package:tf_code_generator/component/layer_serialize.dart';
+import 'package:tf_code_generator/style/style.dart';
 
 /// 右侧的界面，目前只是占空用的，没想到该放啥
 ///

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_application_1/component/global.dart';
-import 'package:flutter_application_1/component/layer_serialize.dart';
-import 'package:flutter_application_1/main.dart';
-import 'package:flutter_application_1/style/style.dart';
+import 'package:tf_code_generator/component/global.dart';
+import 'package:tf_code_generator/component/layer_serialize.dart';
+import 'package:tf_code_generator/main.dart';
+import 'package:tf_code_generator/style/style.dart';
 import 'package:provider/provider.dart';
+
+// 每一个层的显示内容、修改方式虽然大体相似，但内容都不一样，所以有些代码虽然反复无数次出现，例如
+// 点击修改按钮弹出弹窗、布局方式等，但总是要重新写一遍。所以看着有点乱。
 
 // label样式
 Widget buildLayerLabel(
@@ -79,7 +82,7 @@ class _InputDialogState extends State<ListModifyDialog> {
     // 确定ListView长度
     inputDimension = widget.list.length;
     return AlertDialog(
-      title: Text(widget.label),
+      title: Text(widget.label, style: AppStyle.dialogTitleTextStyle),
       content: SizedBox(
         width: 400,
         height: 225,
@@ -270,12 +273,14 @@ class _DenseLayerWidgetState extends State<DenseLayerWidget> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Dense层设置'),
+            title: const Text(
+              'Dense层设置',
+              style: AppStyle.dialogTitleTextStyle,
+            ),
             content: SizedBox(
               width: 400,
               height: 180,
               child: ListView(
-                  // TODO: 感觉居中后没那么好看，再多想想？
                   padding: const EdgeInsets.fromLTRB(75, 0, 75, 0),
                   children: [
                     // 激活层设置
@@ -372,7 +377,10 @@ class _OutputLayerWidgetState extends State<OutputLayerWidget> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Output层设置'),
+            title: const Text(
+              'Output层设置',
+              style: AppStyle.dialogTitleTextStyle,
+            ),
             content: SizedBox(
               width: 400,
               height: 180,
@@ -472,7 +480,10 @@ class _ConvolutionLayerWidgetState extends State<ConvolutionLayerWidget> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Convolution层设置'),
+            title: const Text(
+              'Convolution层设置',
+              style: AppStyle.dialogTitleTextStyle,
+            ),
             content: SizedBox(
               width: 400,
               height: 300,
@@ -634,7 +645,10 @@ class _PoolingLayerWidgetState extends State<PoolingLayerWidget> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Pooling层设置'),
+            title: const Text(
+              'Pooling层设置',
+              style: AppStyle.dialogTitleTextStyle,
+            ),
             content: SizedBox(
               width: 400,
               height: 150,
@@ -654,7 +668,6 @@ class _PoolingLayerWidgetState extends State<PoolingLayerWidget> {
                       width: 250,
                       initialSelection: layerInfo.method,
                       label: const Text('Pooling'),
-                      // TODO: layer_serialize添加pooling种类 已添加待测试
                       onSelected: (value) => layerInfo.method = value,
                     ),
                     // Stride设置
@@ -759,7 +772,10 @@ class _LSTMLayerWidgetState extends State<LSTMLayerWidget> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('LSTM层设置'),
+            title: const Text(
+              'LSTM层设置',
+              style: AppStyle.dialogTitleTextStyle,
+            ),
             content: SizedBox(
               width: 400,
               height: 230,
@@ -869,8 +885,6 @@ class _LSTMLayerWidgetState extends State<LSTMLayerWidget> {
   }
 }
 
-// TODO: Normalization layers BatchNormalization LayerNormalization GroupNormalization
-// axix: int; momentum?: int; group?: int
 // Normalization Layer
 class NormalizationLayerWidget extends BaseLayerWidget {
   const NormalizationLayerWidget(
@@ -900,7 +914,10 @@ class _NormalizationLayerWidgetState extends State<NormalizationLayerWidget> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Normalization层设置'),
+            title: const Text(
+              'Normalization层设置',
+              style: AppStyle.dialogTitleTextStyle,
+            ),
             content: SizedBox(
               width: 400,
               height: 150,
@@ -975,7 +992,6 @@ class _NormalizationLayerWidgetState extends State<NormalizationLayerWidget> {
   }
 }
 
-// TODO: Reshaping layers reshape flatten
 class ReshapeLayerWidget extends BaseLayerWidget {
   const ReshapeLayerWidget(
       {super.key, required super.hash, required this.deleteCallback});
@@ -999,7 +1015,10 @@ class _ReshapeLayerWidgetState extends State<ReshapeLayerWidget> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Reshaping层设置'),
+            title: const Text(
+              'Reshaping层设置',
+              style: AppStyle.dialogTitleTextStyle,
+            ),
             content: SizedBox(
               width: 400,
               height: 75,
@@ -1065,7 +1084,7 @@ class _ReshapeLayerWidgetState extends State<ReshapeLayerWidget> {
                               context: context,
                               builder: (BuildContext context) {
                                 return ListModifyDialog(
-                                  list: layerInfo.kernelSize!,
+                                  list: layerInfo.dimensions!,
                                   label: 'Dimension设置',
                                 );
                               });
@@ -1081,7 +1100,6 @@ class _ReshapeLayerWidgetState extends State<ReshapeLayerWidget> {
   }
 }
 
-// TODO: Regularization: dropout
 class DropoutLayerWidget extends BaseLayerWidget {
   const DropoutLayerWidget(
       {super.key, required super.hash, required this.deleteCallback});
@@ -1105,7 +1123,10 @@ class _DropoutLayerWidgetState extends State<DropoutLayerWidget> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Dropout层设置'),
+            title: const Text(
+              'Dropout层设置',
+              style: AppStyle.dialogTitleTextStyle,
+            ),
             content: SizedBox(
               width: 400,
               height: 120,
@@ -1233,7 +1254,10 @@ class _EmbeddingLayerWidgetState extends State<EmbeddingLayerWidget> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Embedding层设置'),
+            title: const Text(
+              'Embedding层设置',
+              style: AppStyle.dialogTitleTextStyle,
+            ),
             content: SizedBox(
               width: 400,
               height: 120,

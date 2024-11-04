@@ -1,4 +1,4 @@
-import 'package:flutter_application_1/component/layer_serialize.dart';
+import 'package:tf_code_generator/component/layer_serialize.dart';
 
 class GlobalVar {
   static ModelInfo modelInfo = ModelInfo(

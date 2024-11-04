@@ -8,7 +8,6 @@ ModelInfo modelInfoFromJson(String str) => ModelInfo.fromJson(json.decode(str));
 
 String modelInfoToJson(ModelInfo data) => json.encode(data.toJson());
 
-// TODO: layer_serialize添加datasets  已添加待测试
 class ModelInfo {
   String framework;
   String dataset;

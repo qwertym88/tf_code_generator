@@ -2,10 +2,10 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/component/global.dart';
-import 'package:flutter_application_1/widget/code_widget.dart';
-import 'package:flutter_application_1/widget/leftmenu_widget.dart';
-import 'package:flutter_application_1/widget/rightmenu_widget.dart';
+import 'package:tf_code_generator/component/global.dart';
+import 'package:tf_code_generator/widget/code_widget.dart';
+import 'package:tf_code_generator/widget/leftmenu_widget.dart';
+import 'package:tf_code_generator/widget/rightmenu_widget.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -21,12 +21,13 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
         create: (context) => InputChanger(),
         child: MaterialApp(
-          title: 'Helloworld Demo',
+          title: 'TF Code Generator',
           theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+              colorScheme:
+                  ColorScheme.fromSeed(seedColor: const Color(0xFF8785a2)),
               useMaterial3: true,
               visualDensity: VisualDensity.adaptivePlatformDensity),
-          home: const MyHomePage(title: 'Helloworld Demo Home Page'),
+          home: const MyHomePage(title: 'TF Code Generator'),
         ));
   }
 }
@@ -57,26 +58,28 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('hello')),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          // 折叠效果
-          if (constraints.maxWidth > 980.0) {
-            return Row(children: <Widget>[
-              SizedBox(
-                width: 335,
-                child: LeftMenuWidget(rebuildCallback: loadDiagram),
-              ),
-              Expanded(child: CodeWidget(key: _codeWidgetKey)),
-              SizedBox(
-                width: 335,
-                child: RightMenuWidget(key: _rightWidgetKey),
-              ),
-            ]);
-          } else {
-            return CodeWidget(key: _codeWidgetKey);
-          }
-        },
+      body: Container(
+        color: const Color(0xffeeeeee),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // 折叠效果
+            if (constraints.maxWidth > 980.0) {
+              return Row(children: <Widget>[
+                SizedBox(
+                  width: 335,
+                  child: LeftMenuWidget(rebuildCallback: loadDiagram),
+                ),
+                Expanded(child: CodeWidget(key: _codeWidgetKey)),
+                SizedBox(
+                  width: 335,
+                  child: RightMenuWidget(key: _rightWidgetKey),
+                ),
+              ]);
+            } else {
+              return CodeWidget(key: _codeWidgetKey);
+            }
+          },
+        ),
       ),
       floatingActionButton: IconButton(
           icon: const Icon(Icons.arrow_right),
